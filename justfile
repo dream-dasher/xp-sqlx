@@ -19,7 +19,7 @@ _default:
 
 check:
     cargo clippy
-    rust fmt
+    cargo fmt
     typos --exclude 'data/*'
     committed
 

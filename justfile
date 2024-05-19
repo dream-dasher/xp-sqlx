@@ -39,8 +39,6 @@ init: && deps  docker-comp  gen-env
     cargo build    
     cargo doc
 
-
-
 # Clean up cargo build artifacts.
 [confirm]
 clean:
@@ -60,7 +58,7 @@ gen-env:
 sqlx-prep:
     cargo install sqlx-cli
     @echo "Database path required to pull schema."
-    cargo sqlx prepare
+    cargo sqlx prepare -- --all-targets --all-features
     
 # Enter MySQL instance "remotely" with container.
 mysql:

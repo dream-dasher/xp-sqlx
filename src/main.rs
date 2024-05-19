@@ -26,3 +26,10 @@ async fn main() -> Result<(), sqlx::Error> {
 
     Ok(())
 }
+
+/// TODO(match School ENUM in students)
+enum School {
+    Sciences,
+    Humanities,
+    Other,
+}

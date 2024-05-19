@@ -15,7 +15,7 @@ async fn main() -> Result<(), sqlx::Error> {
     let tuples: Vec<(i64, String, String, String)> = sqlx::query_as(
         "SELECT StudentID, FirstName, LastName, School FROM students WHERE StudentID >= ?",
     )
-    .bind(2)
+    .bind(55)
     .fetch_all(&pool)
     .await?;
     tuples

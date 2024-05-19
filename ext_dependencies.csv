@@ -1,7 +1,8 @@
 PROGRAM_NAME,ALIAS,PROGRAM_VERSION,PROGRAM_INSTALL
-just,justfile,,"cargo install just"
 docker,,,
-rg,ripgrep,,"cargo install ripgrep"
-recolor,,,"cargo install recolor"
+just,justfile,,"cargo install just"
+mysql,"mysql cli client",,"brew install mysql"
 nc,netcat,,
-mysql-client,,,"brew install mysql-client"
+recolor,,,"cargo install recolor"
+rg,ripgrep,,"cargo install ripgrep"
+xsv,,,"cargo install xsv"

@@ -28,12 +28,15 @@ check:
 watch file_to_run:
     cargo watch --quiet --clear --exec 'run --quiet --example {{file_to_run}}'
 
-
 # Clean up cargo build artifacts.
 [confirm]
 clean:
     cargo clean
 
+# List dependencies. (Note some dependencies needed to run this command.)
+deps:
+    xsv table ext_dependencies.csv
+    
 # Enter mysql instance "remotely" with container.
 mysql port="3306":
     echo "try: 'SHOW DATABASES; USE student; SHOW TABLES; SELECT * FROM STUDENTS;'"
@@ -55,6 +58,7 @@ docker-run host_port="3306" image_tag="xp-sqlx-mysql-image" container_name="xp-s
     docker image ls
     docker run --publish {{host_port}}:3306 --name={{container_name}} {{image_tag}}     
     docker container ls
+    echo "Checking port for listening Daemon (containerized mysql server would be a positive hit)"
     nc -zv 127.0.0.1 {{host_port}}
 
 # Clean that Docker stuff. Kills container and then force removes image. (same tag)

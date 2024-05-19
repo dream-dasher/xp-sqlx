@@ -43,16 +43,20 @@ async fn main() -> Result<(), sqlx::Error> {
         println!("First name: {}", first_name);
     }
 
-    // TODO() / WARN():
-    // if both enrollments and students have a `StudentID` column then the query
-    // throws an error over, a struct-like entity having a field double specified
+    // WARN():
+    // An "anon record" is returned with types that take the raw column names
+    // so an `e.id` & `s.id` ~~> {id, id}
+    // column names must be adjusted so as not to collide
+    // (I believe this disambiguation will be needed even with the `query_as!`macro)
+    let grade_floor = "A";
     let students_being_good = sqlx::query!(
         "
-SELECT *
+SELECT s.*, e.StudentID as eStudentID
 FROM students s
-JOIN enrollments e ON e.StudentID_x = s.StudentID
-WHERE e.Grade = 'A'
-        "
+JOIN enrollments e ON e.StudentID = s.StudentID
+WHERE e.Grade = ?
+        ",
+        grade_floor
     )
     .fetch_all(&pool)
     .await?;

@@ -57,17 +57,17 @@ VALUES
 -- Create the Enrollments table to link Students and Courses
 CREATE TABLE enrollments (
     EnrollmentID INT NOT NULL AUTO_INCREMENT,
-    StudentID_x INT NOT NULL,
+    StudentID INT NOT NULL,
     CourseID INT NOT NULL,
     EnrollmentDate DATE,
     Grade ENUM('A', 'B', 'C', 'D', 'F', 'Incomplete'),
     PRIMARY KEY (EnrollmentID),
-    FOREIGN KEY (StudentID_x) REFERENCES students(StudentID),
+    FOREIGN KEY (StudentID) REFERENCES students(StudentID),
     FOREIGN KEY (CourseID) REFERENCES courses(CourseID)
 );
 
 -- Insert sample data into the Enrollments table
-INSERT INTO enrollments (StudentID_x, CourseID, EnrollmentDate, Grade)
+INSERT INTO enrollments (StudentID, CourseID, EnrollmentDate, Grade)
 VALUES 
     (1, 1, '2023-09-01', 'A'),
     (1, 2, '2023-09-01', 'B'),

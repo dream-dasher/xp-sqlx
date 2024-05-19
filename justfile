@@ -51,8 +51,9 @@ deps:
 
 # generate a `.env` file to place your database path in.
 gen-env:
-    @echo "{{CYN}}This {{GRN}}.env {{CYN}}will populate your database path when needed.  Please edit the file to manually specify."
-    cp 'template.env' '.env'
+    @echo "{{CYN}}The {{GRN}}.env DATABASE_URL value{{CYN}}will populate your database path when needed.  Please edit the file to manually specify."
+    @echo {{ if path_exists(".env") == "true" { `echo "\(.env file already exists\)"` } else { `cp 'template.env' '.env'; echo "\(.env file created\)"`} }}
+    
 
 # Pull local schema to dir to allow off-line building.
 sqlx-prep:
@@ -98,3 +99,12 @@ docker-destroy:
     docker image ls | recolor '({{IMAGE_AND_TAG}})'
     @echo "{{PRP}}vv--------- containers post destroy ---------vv"
     docker container ls | recolor '({{CONT}})'
+
+
+# ######################################################################## #
+
+# Example function for syntax reference
+_example_file_esists_test file:
+    echo {{ if path_exists(file) == "true" { "hello" } else { "goodbye" } }}
+        
+

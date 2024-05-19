@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.4.0
     container_name: xp-sqlx-mysql-container
     environment:
       MYSQL_ROOT_PASSWORD: root

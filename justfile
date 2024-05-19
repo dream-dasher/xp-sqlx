@@ -1,6 +1,11 @@
 # Justfile (Convenience Command Runner)
 
 
+# local vars
+IMAGE_AND_TAG := 'mysql:8.4.0'
+CONT := 'xp-sqlx-mysql-container'
+HOST_PORT := '3306'
+
 # home_dir := env_var('HOME')
 local_root := justfile_directory()
 invocd_from := invocation_directory()
@@ -13,38 +18,51 @@ BRN := '\033[0;33m' # Brown
 CYN := '\033[0;36m' # Cyan
 NC := '\033[0m'     # No Color
 
-# local vars
-IMAGE_AND_TAG := 'mysql:8.4.0'
-CONT := 'xp-sqlx-mysql-container'
-HOST_PORT := '3306'
-
 # Default, lists commands.
 _default:
         @ just --list --unsorted
 
 # Linting, formatting, typo checking, etc.
 check:
-    cargo clippy
-    cargo fmt
-    typos --exclude 'data/*'
-    committed
+    -cargo clippy
+    -cargo fmt
+    -typos --exclude 'data/*'
+    -committed
+    -cargo sqlx prepare --check
 
 # Watch a file: compile & run on changes.
 watch file_to_run:
     cargo watch --quiet --clear --exec 'run --quiet --example {{file_to_run}}'
+
+# Initialize repository.
+init: && deps  docker-comp  gen-env
+    cargo build    
+    cargo doc
 
 # Clean up cargo build artifacts.
 [confirm]
 clean:
     cargo clean
 
-# List dependencies. (Note some dependencies needed to run this command.)
+# List dependencies. (This command has dependencies.)
 deps:
+    @echo "{{CYN}}List of external dependencies for this command runner:"
     xsv table ext_dependencies.csv
+
+# generate a `.env` file to place your database path in.
+gen-env:
+    @echo "{{CYN}}This {{GRN}}.env {{CYN}}will populate your database path when needed.  Please edit the file to manually specify."
+    cp 'template.env' '.env'
+
+# Pull local schema to dir to allow off-line building.
+sqlx-prep:
+    cargo install sqlx-cli
+    @echo "Database path required to pull schema."
+    cargo sqlx prepare -- --all-targets --all-features
     
-# Enter mysql instance "remotely" with container.
+# Enter MySQL instance "remotely" with container.
 mysql:
-    echo "try: 'SHOW DATABASES; USE university; SHOW TABLES; SELECT * FROM STUDENTS;'"
+    @echo "try: 'SHOW DATABASES; USE university; SHOW TABLES; SELECT * FROM STUDENTS;'"
     mysql --host 127.0.0.1 --port {{HOST_PORT}} --user root --password=root
 
 # Run the Docker compose file.
@@ -58,7 +76,7 @@ docker-build:
     docker build --tag {{IMAGE_AND_TAG}} data/db_gen/.
     docker image ls | recolor '({{IMAGE_AND_TAG}})'
  
-# Run Docker image. (Create container instance. NOT detached.)
+# Run Docker image.
 docker-run:
     docker image ls
     docker run --publish {{HOST_PORT}}:3306 --name={{CONT}} {{IMAGE_AND_TAG}}     
@@ -66,17 +84,17 @@ docker-run:
     echo "Checking port for listening Daemon (containerized mysql server would be a positive hit)"
     nc -zv 127.0.0.1 {{HOST_PORT}}
 
-# Clean that Docker stuff. Kills container and then force removes image. (same tag)
+# Remove Docker image & container.
 [confirm]
 docker-destroy:
     docker image ls | recolor '({{IMAGE_AND_TAG}})'
-    echo "{{GRN}}^^--------- images pre destroy ---------^^"
+    @echo "{{GRN}}^^--------- images pre destroy ---------^^"
     docker container ls | recolor '({{CONT}})'
-    echo "{{GRN}}^^--------- containers pre destroy ---------^^"
+    @echo "{{GRN}}^^--------- containers pre destroy ---------^^"
     -docker kill {{CONT}}
     -docker container rm {{CONT}}
     -docker image rm {{IMAGE_AND_TAG}}
-    echo "{{PRP}}vv--------- images post destroy ---------vv"
+    @echo "{{PRP}}vv--------- images post destroy ---------vv"
     docker image ls | recolor '({{IMAGE_AND_TAG}})'
-    echo "{{PRP}}vv--------- containers post destroy ---------vv"
+    @echo "{{PRP}}vv--------- containers post destroy ---------vv"
     docker container ls | recolor '({{CONT}})'

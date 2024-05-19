@@ -5,4 +5,5 @@ mysql,"mysql cli client",,"brew install mysql"
 nc,netcat,,
 recolor,,,"cargo install recolor"
 rg,ripgrep,,"cargo install ripgrep"
+sqlx-cli,,,"cargo install sqlx-cli"
 xsv,,,"cargo install xsv"

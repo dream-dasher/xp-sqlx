@@ -1,6 +1,28 @@
+use chrono::NaiveDate;
+use derive_more::Display;
 use futures::TryStreamExt;
 use sqlx::mysql::MySqlPoolOptions;
-use sqlx::Row;
+use sqlx::{FromRow, Row};
+
+// FromRow is not used by query_as!
+#[derive(Debug, Display)]
+#[display(
+    fmt = "Student:{} Name: {} {} Born: {}",
+    "StudentID.unwrap_or_default()",
+    "FirstName.clone().unwrap_or_default()",
+    "LastName.clone().unwrap_or_default()",
+    "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
+)]
+struct Student {
+    // this is part of FromRow, which query_as! does not use
+    // #[sqlx(rename = "StudentID")]
+    StudentID: Option<i32>,
+    FirstName: Option<String>,
+    LastName: Option<String>,
+    DateOfBirth: Option<NaiveDate>,
+    School: Option<String>,
+    Email: Option<String>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
@@ -10,12 +32,20 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("mysql://root:root@127.0.0.1/university")
         .await?;
 
+    let student = sqlx::query_as!(Student, "SELECT * FROM students WHERE StudentID =?", 5)
+        .fetch_one(&pool)
+        .await?;
+
+    println!("-------------------------");
+    println!("{:?}", student);
+    println!("-------------------------");
+
     // Note: 'INT' minimally is i32, but may also be i64
     //       'ENUM' can be String
     let tuples: Vec<(i64, String, String, String)> = sqlx::query_as(
         "SELECT StudentID, FirstName, LastName, School FROM students WHERE StudentID >= ?",
     )
-    .bind(55)
+    .bind(62)
     .fetch_all(&pool)
     .await?;
     tuples

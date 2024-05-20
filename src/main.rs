@@ -4,16 +4,20 @@ use futures::TryStreamExt;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{FromRow, Row};
 
-// FromRow is not used by query_as!
+/// Student to use with `query_as!`
+///
+/// FromRow is **not** used by query_as!
+/// `query_as!` is rigid (and reliable) and easy
+/// but lacks customization options
 #[derive(Debug, Display)]
 #[display(
-    fmt = "Student:{} Name: {} {} Born: {}",
+    fmt = "StudentQA:{} Name: {} {} Born: {}",
     "StudentID.unwrap_or_default()",
     "FirstName.clone().unwrap_or_default()",
     "LastName.clone().unwrap_or_default()",
     "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
 )]
-struct Student {
+struct StudentQA {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
     StudentID: Option<i32>,
@@ -22,6 +26,34 @@ struct Student {
     DateOfBirth: Option<NaiveDate>,
     School: Option<String>,
     Email: Option<String>,
+}
+/// Student to use with `query!`
+///
+/// More work, and more potential for mistakes
+/// but more control than with `query_as!`
+#[derive(Debug, Display, FromRow)]
+#[display(
+    fmt = "StudentQ:{} Name: {} {} Born: {}",
+    "id.unwrap_or_default()",
+    "first_name.clone().unwrap_or_default()",
+    "last_name.clone().unwrap_or_default()",
+    "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
+)]
+struct StudentQ {
+    // this is part of FromRow, which query_as! does not use
+    // #[sqlx(rename = "StudentID")]
+    #[sqlx(rename = "StudentID")]
+    id: Option<i32>,
+    #[sqlx(rename = "FirstName")]
+    first_name: Option<String>,
+    #[sqlx(rename = "LastName")]
+    last_name: Option<String>,
+    #[sqlx(rename = "DateOfBirth")]
+    dob: Option<NaiveDate>,
+    #[sqlx(rename = "School")]
+    school: Option<String>,
+    #[sqlx(rename = "Email")]
+    email: Option<String>,
 }
 
 #[tokio::main]
@@ -32,12 +64,23 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("mysql://root:root@127.0.0.1/university")
         .await?;
 
-    let student = sqlx::query_as!(Student, "SELECT * FROM students WHERE StudentID =?", 5)
+    let student_qa = sqlx::query_as!(StudentQA, "SELECT * FROM students WHERE StudentID =?", 5)
         .fetch_one(&pool)
         .await?;
 
     println!("-------------------------");
-    println!("{:?}", student);
+    println!("------ Query _ AS  ! ------");
+    println!("{}", student_qa);
+    println!("-------------------------");
+    // ////////////////////////
+
+    let student_q: StudentQ = sqlx::query_as("SELECT * FROM students WHERE StudentID = 5")
+        .fetch_one(&pool)
+        .await?;
+
+    println!("-------------------------");
+    println!("------ Query _ AS    ------");
+    println!("{}", student_q);
     println!("-------------------------");
 
     // Note: 'INT' minimally is i32, but may also be i64

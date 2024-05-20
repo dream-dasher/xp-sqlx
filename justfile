@@ -6,6 +6,11 @@ IMAGE_AND_TAG := 'mysql:8.4.0'
 CONT := 'xp-sqlx-mysql-container'
 HOST_PORT := '3306'
 
+# rust vars
+RUST_LOG:= 'debug'
+RUST_BACKTRACE:= '1'
+RUSTFLAGS:='--cfg tokio_unstable'
+
 # home_dir := env_var('HOME')
 local_root := justfile_directory()
 invocd_from := invocation_directory()
@@ -104,7 +109,7 @@ docker-destroy:
 # ######################################################################## #
 
 # Example function for syntax reference
-_example_file_esists_test file:
+_example_file_exists_test file:
     echo {{ if path_exists(file) == "true" { "hello" } else { "goodbye" } }}
         
 

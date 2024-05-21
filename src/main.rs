@@ -8,7 +8,9 @@ async fn main() -> Result<(), sqlx::Error> {
     let pool = MySqlPool::connect("mysql://127.0.0.1:13309/pagerduty_production").await?;
     // let pool = MySqlPool::connect("mysql://root:root@127.0.0.1/student").await?;
 
-    let mut rows = sqlx::query("SELECT subdomain FROM accounts LIMIT 3").fetch(&pool);
+    let mut rows = sqlx::query("SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3")
+        .bind("%pdt%")
+        .fetch(&pool);
 
     while let Some(row) = rows.try_next().await? {
         // dbg!(row);

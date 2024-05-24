@@ -15,6 +15,7 @@ RUSTFLAGS:='--cfg tokio_unstable'
 local_root := justfile_directory()
 invocd_from := invocation_directory()
 invoc_is_root := if invocd_from == local_root { "true" } else { "false" }
+froze_sha_regex := 'FROZE_[a-fA-F0-9]{64}_FROZE-'
 ## ANSI Color Codes for use with echo command
 GRN := '\033[0;32m' # Green
 BLU := '\033[0;34m' # Blue
@@ -105,8 +106,30 @@ docker-destroy:
     @echo "{{PRP}}vv--------- containers post destroy ---------vv"
     docker container ls | recolor '({{CONT}})'
 
+# ######################################################################## #
+
+# Freeze! For your safety.
+freeze FILE:
+	mv -iv {{FILE}} FROZE_{{sha256(FILE)}}_FROZE-{{FILE}} | rg {{FILE}}
+
+# Unfreeze a file. (removes 'FROZE...FROZE-' tag from filename)
+thaw FILE:
+	echo {{FILE}} | sd '{{froze_sha_regex}}' '' | xargs mv -iv {{FILE}} 
+
+# Find local file(s) through the ice.
+arctic_recon ICELESS_NAME:
+	fd --max-depth 1 '{{froze_sha_regex}}{{ICELESS_NAME}}' | rg {{ICELESS_NAME}}
+
 
 # ######################################################################## #
+
+# Speak Funny to Me!
+_uu:
+	echo {{uuid()}}
+
+# Say my name.
+_sha FILE:
+	echo {{sha256_file(FILE)}}
 
 # Example function for syntax reference
 _example_file_exists_test file:

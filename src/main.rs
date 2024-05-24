@@ -18,14 +18,34 @@ async fn main() -> Result<(), sqlx::Error> {
     let pool = MySqlPool::connect("mysql://127.0.0.1:13309/pagerduty_production").await?;
     // let pool = MySqlPool::connect("mysql://root:root@127.0.0.1/student").await?;
 
-    let mut rows = sqlx::query("SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3")
-        .bind(format!("%{}%", args.likeness))
-        .fetch(&pool);
+    let mut rows_dyn_fetch =
+        sqlx::query("SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3")
+            .bind(format!("%{}%", args.likeness))
+            .fetch(&pool);
 
-    while let Some(row) = rows.try_next().await? {
+    while let Some(row) = rows_dyn_fetch.try_next().await? {
         // dbg!(row);
         let subdomain: &str = row.try_get("subdomain")?;
-        println!("Subdomain, first three in __ order: {}", subdomain);
+        println!(
+            "Dyn fetch: Subdomain, first three in __ order: {}",
+            subdomain
+        );
+    }
+
+    // NOTE: verified (macro) queries take param values as *arguments* rather than bind methods.
+    let mut rows_stat_fetch = sqlx::query!(
+        "SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3",
+        format!("%{}%", args.likeness)
+    )
+    .fetch(&pool);
+
+    while let Some(row) = rows_stat_fetch.try_next().await? {
+        // dbg!(row);
+        let subdomain = row.subdomain;
+        println!(
+            "Static check fetch: Subdomain, first three in __ order: {}",
+            subdomain
+        );
     }
 
     let mut rows = sqlx::query("SELECT subdomain FROM accounts WHERE id = 10 LIMIT 1").fetch(&pool);

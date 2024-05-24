@@ -1,0 +1,25 @@
+{
+  "db_name": "MySQL",
+  "query": "SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "subdomain",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "char_set": 224,
+          "max_size": 160
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fcfc2afe893139ec94d20945ce95090a6143a15db54d20fb6a24a076ed3be910"
+}

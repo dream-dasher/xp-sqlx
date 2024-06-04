@@ -20,6 +20,18 @@ struct StudentQA {
     Email: Option<String>,
 }
 
+/// Vecs of each field
+/// to transpose the memory representation
+#[derive(Debug)]
+struct VecOfStudentQA {
+    pub student_id: Vec<Option<i32>>,
+    pub first_name: Vec<Option<String>>,
+    pub last_name: Vec<Option<String>>,
+    pub date_of_birth: Vec<Option<NaiveDate>>,
+    pub school: Vec<Option<String>>,
+    pub email: Vec<Option<String>>,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
     // Connection Pool
@@ -28,29 +40,25 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("mysql://root:root@127.0.0.1/university")
         .await?;
 
-    // making vecs manually
-    let mut student_ids: Vec<Option<i32>> = Vec::new();
-    let mut first_names: Vec<Option<String>> = Vec::new();
-    let mut last_names: Vec<Option<String>> = Vec::new();
-    let mut dates_of_birth: Vec<Option<NaiveDate>> = Vec::new();
-    let mut schools: Vec<Option<String>> = Vec::new();
-    let mut emails: Vec<Option<String>> = Vec::new();
-
+    let mut vstruct = VecOfStudentQA {
+        student_id: Vec::new(),
+        first_name: Vec::new(),
+        last_name: Vec::new(),
+        date_of_birth: Vec::new(),
+        school: Vec::new(),
+        email: Vec::new(),
+    };
     let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
     while let Some(student) = student_stream.try_next().await? {
-        student_ids.push(student.StudentID);
-        first_names.push(student.FirstName);
-        last_names.push(student.LastName);
-        dates_of_birth.push(student.DateOfBirth);
-        schools.push(student.School);
-        emails.push(student.Email);
+        vstruct.student_id.push(student.StudentID);
+        vstruct.first_name.push(student.FirstName);
+        vstruct.last_name.push(student.LastName);
+        vstruct.date_of_birth.push(student.DateOfBirth);
+        vstruct.school.push(student.School);
+        vstruct.email.push(student.Email);
     }
-    println!("field StudentId:\n{:?}\n", student_ids);
-    println!("field FirstName:\n{:?}\n", first_names);
-    println!("field LastName:\n{:?}\n", last_names);
-    println!("field DateOfBirth:\n{:?}\n", dates_of_birth);
-    println!("field School:\n{:?}\n", schools);
-    println!("field Email:\n{:?}\n", emails);
+
+    println!("{:?}", vstruct);
 
     Ok(())
 }

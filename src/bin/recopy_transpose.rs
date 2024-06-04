@@ -1,8 +1,26 @@
 use chrono::NaiveDate;
 use derive_more::Display;
-use futures::{StreamExt, TryStreamExt};
+use futures::TryStreamExt;
+use polars::prelude::*;
 use sqlx::mysql::MySqlPoolOptions;
-use sqlx::{FromRow, Row};
+
+macro_rules! struct_to_dataframe {
+    ($input:expr, [$($field:ident),+]) => {
+        {
+            let len = $input.len().to_owned();
+
+            // Extract the field values into separate vectors
+            $(let mut $field = Vec::with_capacity(len);)*
+
+            for e in $input.into_iter() {
+                $($field.push(e.$field);)*
+            }
+            df! {
+                $(stringify!($field) => $field,)*
+            }
+        }
+    };
+}
 
 /// Student to use with `query_as!`
 ///
@@ -42,6 +60,14 @@ async fn main() -> Result<(), sqlx::Error> {
     }
 
     println!("{:?}", student_vec);
+
+    #[allow(non_snake_case)]
+    let df = struct_to_dataframe!(
+        student_vec,
+        [StudentID, FirstName, LastName, DateOfBirth, School, Email]
+    );
+
+    println!("\n\nDataframe:\n{:?}", df);
 
     Ok(())
 }

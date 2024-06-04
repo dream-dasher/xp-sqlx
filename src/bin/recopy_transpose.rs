@@ -4,6 +4,8 @@ use futures::TryStreamExt;
 use polars::prelude::*;
 use sqlx::mysql::MySqlPoolOptions;
 
+/// Takes a Vec<Struct> and generates a Polars::DataFrame
+/// by way of multiple Vec<field_x>s
 macro_rules! struct_to_dataframe {
     ($input:expr, [$($field:ident),+]) => {
         {

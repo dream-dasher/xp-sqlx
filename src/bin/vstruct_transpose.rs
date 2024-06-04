@@ -3,6 +3,8 @@ use futures::TryStreamExt;
 use polars::prelude::*;
 use sqlx::mysql::MySqlPoolOptions;
 
+/// Struct of Vecs into a Polars::DataFrame
+/// Simply passing the fields into the `df!` macro with labels
 macro_rules! vstruct_to_dataframe {
     ($input:expr, [$($field:ident),+]) => {
         {

@@ -1,0 +1,80 @@
+{
+  "db_name": "MySQL",
+  "query": "SELECT * FROM students",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "StudentID",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "char_set": 63,
+          "max_size": 11
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "FirstName",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "char_set": 224,
+          "max_size": 400
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "LastName",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "char_set": 224,
+          "max_size": 400
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "DateOfBirth",
+        "type_info": {
+          "type": "Date",
+          "flags": "BINARY",
+          "char_set": 63,
+          "max_size": 10
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "School",
+        "type_info": {
+          "type": "String",
+          "flags": "ENUM",
+          "char_set": 224,
+          "max_size": 40
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "Email",
+        "type_info": {
+          "type": "VarString",
+          "flags": "",
+          "char_set": 224,
+          "max_size": 1020
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "f5a8606a1f3a53c9f5e7fe97badfde65da3287501d654d4f2b9553c017cc7f86"
+}

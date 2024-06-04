@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use derive_more::Display;
-use futures::TryStreamExt;
+use futures::{StreamExt, TryStreamExt};
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{FromRow, Row};
 
@@ -64,6 +64,18 @@ async fn main() -> Result<(), sqlx::Error> {
         .max_connections(5)
         .connect("mysql://root:root@127.0.0.1/university")
         .await?;
+
+    let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+    while let Some(student) = student_stream.try_next().await? {
+        println!("Student, {}", student);
+    }
+
+    // fetch + await-loop
+    let mut rows = sqlx::query("SELECT * FROM professors").fetch(&pool);
+    while let Some(row) = rows.try_next().await? {
+        let first_name: &str = row.try_get("FirstName")?;
+        println!("First name: {}", first_name);
+    }
 
     let student_qa = sqlx::query_as!(StudentQA, "SELECT * FROM students WHERE StudentID =?", 5)
         .fetch_one(&pool)

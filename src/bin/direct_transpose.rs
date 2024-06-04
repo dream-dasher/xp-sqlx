@@ -1,8 +1,6 @@
 use chrono::NaiveDate;
-use derive_more::Display;
-use futures::{StreamExt, TryStreamExt};
+use futures::TryStreamExt;
 use sqlx::mysql::MySqlPoolOptions;
-use sqlx::{FromRow, Row};
 
 /// Student to use with `query_as!`
 ///

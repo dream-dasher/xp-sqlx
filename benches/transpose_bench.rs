@@ -45,8 +45,8 @@ fn main() {
     divan::main();
 }
 
-#[divan::bench()]
-async fn recopy_transpose() -> Result<(), sqlx::Error> {
+#[divan::bench(args = [1,10,100,1000,10_000,100_000])]
+async fn recopy_transpose(repeats: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
@@ -54,9 +54,11 @@ async fn recopy_transpose() -> Result<(), sqlx::Error> {
         .await?;
 
     let mut student_vec = Vec::new();
-    let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
-    while let Some(student) = student_stream.try_next().await? {
-        student_vec.push(student);
+    for _ in 0..repeats {
+        let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        while let Some(student) = student_stream.try_next().await? {
+            student_vec.push(student);
+        }
     }
 
     println!("{:?}", student_vec);
@@ -98,8 +100,8 @@ struct VecOfStudentQA {
     pub email: Vec<Option<String>>,
 }
 
-#[divan::bench()]
-async fn vstruct_transpose() -> Result<(), sqlx::Error> {
+#[divan::bench(args = [1,10,100,1000,10_000,100_000])]
+async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
@@ -114,14 +116,16 @@ async fn vstruct_transpose() -> Result<(), sqlx::Error> {
         school: Vec::new(),
         email: Vec::new(),
     };
-    let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
-    while let Some(student) = student_stream.try_next().await? {
-        vstruct.student_id.push(student.StudentID);
-        vstruct.first_name.push(student.FirstName);
-        vstruct.last_name.push(student.LastName);
-        vstruct.date_of_birth.push(student.DateOfBirth);
-        vstruct.school.push(student.School);
-        vstruct.email.push(student.Email);
+    for _ in 0..repeats {
+        let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        while let Some(student) = student_stream.try_next().await? {
+            vstruct.student_id.push(student.StudentID);
+            vstruct.first_name.push(student.FirstName);
+            vstruct.last_name.push(student.LastName);
+            vstruct.date_of_birth.push(student.DateOfBirth);
+            vstruct.school.push(student.School);
+            vstruct.email.push(student.Email);
+        }
     }
 
     println!("{:?}", vstruct);

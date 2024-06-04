@@ -1,6 +1,17 @@
 use chrono::NaiveDate;
 use futures::TryStreamExt;
+use polars::prelude::*;
 use sqlx::mysql::MySqlPoolOptions;
+
+macro_rules! vstruct_to_dataframe {
+    ($input:expr, [$($field:ident),+]) => {
+        {
+            df! {
+                $(stringify!($field) => $input.$field,)*
+            }
+        }
+    };
+}
 
 /// Student to use with `query_as!`
 ///
@@ -57,6 +68,20 @@ async fn main() -> Result<(), sqlx::Error> {
     }
 
     println!("{:?}", vstruct);
+
+    let df = vstruct_to_dataframe!(
+        vstruct,
+        [
+            student_id,
+            first_name,
+            last_name,
+            date_of_birth,
+            school,
+            email
+        ]
+    );
+
+    println!("\n\nDataframe:\n{:?}", df);
 
     Ok(())
 }

@@ -17,6 +17,7 @@ use sqlx::{FromRow, Row};
     "LastName.clone().unwrap_or_default()",
     "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
 )]
+#[allow(non_snake_case)]
 struct StudentQA {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]

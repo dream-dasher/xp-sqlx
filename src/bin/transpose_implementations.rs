@@ -26,6 +26,7 @@ struct Args {
 enum TransImpl {
     Direct,
     Recopy,
+    // set to 'v-struct', but not worth hunting for more syntax to get rename = "lower" to work
     VStruct,
     All,
 }

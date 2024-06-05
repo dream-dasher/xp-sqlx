@@ -56,7 +56,7 @@ deps:
     xsv table ext_dependencies.csv
 
 hyperf reps:
-    @echo "{{PRP}}NOTE{{NC}}: we only care about 'recopy' and 'vstruct', 'direct' does not do DF creation, 'all' was quick substitution bench framework"
+    @echo "{{PRP}}NOTE{{NC}}: we only care about 'recopy' and 'vstruct'; 'direct' does not do DF creation, 'all' was quick substitution bench framework"
     @echo "Release:"
     hyperfine --warmup 3 'target/release/transpose_implementations recopy {{reps}}'
     hyperfine --warmup 3 'target/release/transpose_implementations v-struct {{reps}}'

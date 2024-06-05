@@ -74,6 +74,7 @@ pub struct VecOfStudentQA {
 }
 
 /// Vec<Struct> ~~> Polars::DataFrame
+#[inline]
 pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new()
@@ -103,6 +104,7 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
 }
 
 /// Struct<vecs> ~~> Polars::DataFrame
+#[inline]
 pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new()
@@ -152,6 +154,7 @@ pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
 }
 
 /// Directly creating n Vec<field>s then creating a DataFrame
+#[inline]
 pub async fn direct_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new()

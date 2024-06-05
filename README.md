@@ -1,6 +1,17 @@
 # xp-SQLx
 
 
+comparative times (for memory transpose approaches)
+Times Recorded (ms):
+```
+TimesTaken {
+    direct: 46692,  <-- not even converted to a dataframe
+    vstruct: 28609,
+    recopy: 58234,
+}
+```
+
+
 - Query
  - Yields Row
 - Query_as

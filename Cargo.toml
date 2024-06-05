@@ -5,7 +5,12 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-clap = { version = "4.5.4", features = ["env", "derive", "string", "wrap_help"] }
+clap = { version = "4.5.4", features = [
+    "env",
+    "derive",
+    "string",
+    "wrap_help",
+] }
 derive_more = "0.99"
 eframe = "0.27"
 egui = "0.27"
@@ -27,12 +32,3 @@ sqlx = { version = "0.7", features = [
     "chrono",
 ] }
 tokio = { version = "1.37", features = ["full", "tracing"] }
-
-[dev-dependencies]
-criterion = { version = "0.5.1", features = [
-    "async_tokio",
-    "futures",
-    "html_reports",
-    "csv",
-] }
-

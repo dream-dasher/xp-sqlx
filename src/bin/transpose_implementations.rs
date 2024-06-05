@@ -1,11 +1,11 @@
 //! comparing (running) come different ways implementations that
 //! get a sqlx stream into a polars::DataFrame
 
-use derive_more::{Constructor, Display};
 use std::time::Instant;
-use xp_sqlx::stream_to_df::{direct_transpose, recopy_transpose, vstruct_transpose};
 
 use clap::{Parser, ValueEnum};
+use derive_more::{Constructor, Display};
+use xp_sqlx::stream_to_df::{direct_transpose, recopy_transpose, vstruct_transpose};
 #[derive(Parser, Debug)]
 #[command(version, about)]
 /// Arguments to select MemoryTranspose Implementations and Repetition of DB draws (increasing data transposed)
@@ -19,7 +19,7 @@ struct Args {
     /// Select the implementation to test
     implementation: TransImpl,
     /// Number of times to repeat the test
-    repetition: u32,
+    repetition:     u32,
 }
 
 #[derive(ValueEnum, Clone, Debug)]
@@ -32,16 +32,14 @@ enum TransImpl {
 }
 
 #[derive(Debug, Constructor, Display)]
-#[display(
-    fmt = "Direct impl time: {}\nRecopy impl time: {}\nVStruct impl time: {}",
-    direct,
-    recopy,
-    vstruct
-)]
+#[display(fmt = "Direct impl time: {}\nRecopy impl time: {}\nVStruct impl time: {}",
+          direct,
+          recopy,
+          vstruct)]
 struct TimesTaken {
-    pub direct: u128,
+    pub direct:  u128,
     pub vstruct: u128,
-    pub recopy: u128,
+    pub recopy:  u128,
 }
 
 #[tokio::main]
@@ -79,9 +77,7 @@ async fn main() -> Result<(), sqlx::Error> {
     };
 
     let elapsed_time = now.elapsed();
-    println!(
-        "\n\nTotal Time Recorded (ms):\n{:#?}",
-        elapsed_time.as_millis()
-    );
+    println!("\n\nTotal Time Recorded (ms):\n{:#?}",
+             elapsed_time.as_millis());
     Ok(())
 }

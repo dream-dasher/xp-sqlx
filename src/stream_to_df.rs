@@ -44,43 +44,40 @@ macro_rules! vstruct_to_dataframe {
 /// `query_as!` is rigid (and reliable) and easy
 /// but lacks customization options
 #[derive(Debug, Display)]
-#[display(
-    fmt = "StudentQA:{} Name: {} {} Born: {}",
-    "StudentID.unwrap_or_default()",
-    "FirstName.clone().unwrap_or_default()",
-    "LastName.clone().unwrap_or_default()",
-    "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
-)]
+#[display(fmt = "StudentQA:{} Name: {} {} Born: {}",
+          "StudentID.unwrap_or_default()",
+          "FirstName.clone().unwrap_or_default()",
+          "LastName.clone().unwrap_or_default()",
+          "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 #[allow(non_snake_case)]
 pub struct StudentQA {
-    StudentID: Option<i32>,
-    FirstName: Option<String>,
-    LastName: Option<String>,
+    StudentID:   Option<i32>,
+    FirstName:   Option<String>,
+    LastName:    Option<String>,
     DateOfBirth: Option<NaiveDate>,
-    School: Option<String>,
-    Email: Option<String>,
+    School:      Option<String>,
+    Email:       Option<String>,
 }
 
 /// Vecs of each field
 /// to transpose the memory representation
 #[derive(Debug)]
 pub struct VecOfStudentQA {
-    pub student_id: Vec<Option<i32>>,
-    pub first_name: Vec<Option<String>>,
-    pub last_name: Vec<Option<String>>,
+    pub student_id:    Vec<Option<i32>>,
+    pub first_name:    Vec<Option<String>>,
+    pub last_name:     Vec<Option<String>>,
     pub date_of_birth: Vec<Option<NaiveDate>>,
-    pub school: Vec<Option<String>>,
-    pub email: Vec<Option<String>>,
+    pub school:        Vec<Option<String>>,
+    pub email:         Vec<Option<String>>,
 }
 
 /// Vec<Struct> ~~> Polars::DataFrame
 #[inline]
 pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
-    let pool = MySqlPoolOptions::new()
-        .max_connections(5)
-        .connect("mysql://root:root@127.0.0.1/university")
-        .await?;
+    let pool = MySqlPoolOptions::new().max_connections(5)
+                                      .connect("mysql://root:root@127.0.0.1/university")
+                                      .await?;
 
     let mut student_vec = Vec::new();
     for _ in 0..repeat {
@@ -93,10 +90,12 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     println!("{:?}", student_vec);
 
     #[allow(non_snake_case)]
-    let df = struct_to_dataframe!(
-        student_vec,
-        [StudentID, FirstName, LastName, DateOfBirth, School, Email]
-    );
+    let df = struct_to_dataframe!(student_vec, [StudentID,
+                                                FirstName,
+                                                LastName,
+                                                DateOfBirth,
+                                                School,
+                                                Email]);
 
     println!("\n\nDataframe:\n{:?}", df);
 
@@ -107,21 +106,18 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
 #[inline]
 pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
-    let pool = MySqlPoolOptions::new()
-        .max_connections(5)
-        .connect("mysql://root:root@127.0.0.1/university")
-        .await?;
+    let pool = MySqlPoolOptions::new().max_connections(5)
+                                      .connect("mysql://root:root@127.0.0.1/university")
+                                      .await?;
 
     // I need a `new()` for this, lol
     // is there an easier way to get defaults...?
-    let mut vstruct = VecOfStudentQA {
-        student_id: Vec::new(),
-        first_name: Vec::new(),
-        last_name: Vec::new(),
-        date_of_birth: Vec::new(),
-        school: Vec::new(),
-        email: Vec::new(),
-    };
+    let mut vstruct = VecOfStudentQA { student_id:    Vec::new(),
+                                       first_name:    Vec::new(),
+                                       last_name:     Vec::new(),
+                                       date_of_birth: Vec::new(),
+                                       school:        Vec::new(),
+                                       email:         Vec::new(), };
     for _ in 0..repeats {
         let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
         while let Some(student) = student_stream.try_next().await? {
@@ -136,17 +132,12 @@ pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
 
     println!("{:?}", vstruct);
 
-    let df = vstruct_to_dataframe!(
-        vstruct,
-        [
-            student_id,
-            first_name,
-            last_name,
-            date_of_birth,
-            school,
-            email
-        ]
-    );
+    let df = vstruct_to_dataframe!(vstruct, [student_id,
+                                             first_name,
+                                             last_name,
+                                             date_of_birth,
+                                             school,
+                                             email]);
 
     println!("\n\nDataframe:\n{:?}", df);
 
@@ -157,10 +148,9 @@ pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
 #[inline]
 pub async fn direct_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
-    let pool = MySqlPoolOptions::new()
-        .max_connections(5)
-        .connect("mysql://root:root@127.0.0.1/university")
-        .await?;
+    let pool = MySqlPoolOptions::new().max_connections(5)
+                                      .connect("mysql://root:root@127.0.0.1/university")
+                                      .await?;
 
     // making vecs manually
     let mut student_ids: Vec<Option<i32>> = Vec::new();

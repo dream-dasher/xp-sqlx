@@ -28,7 +28,14 @@ sqlx = { version = "0.7", features = [
 tokio = { version = "1.37", features = ["full", "tracing"] }
 
 [dev-dependencies]
-divan = "0.1"
+criterion = { version = "0.5.1", features = [
+    "async",
+    "async_tokio",
+    "tokio",
+    "futures",
+    "html_reports",
+    "csv",
+] }
 
 [[bench]]
 name = "transpose_bench"

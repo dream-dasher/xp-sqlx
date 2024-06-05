@@ -42,7 +42,7 @@ watch file_to_run:
 
 # Initialize repository.
 init: && deps  docker-comp  gen-env
-    cargo build    
+    cargo build
     cargo doc
 
 # Clean up cargo build artifacts.
@@ -55,18 +55,27 @@ deps:
     @echo "{{CYN}}List of external dependencies for this command runner:"
     xsv table ext_dependencies.csv
 
+hyperf reps:
+    echo "{{PRP}}NOTE{{NC}}: we only care about 'recopy' and 'vstruct', 'direct' does not do DF creation, 'all' was quick substitution bench framework"
+    echo "Release:"
+    hyperfine --warmup 3 'target/release/transpose_implementations recopy {{reps}}'
+    hyperfine --warmup 3 'target/release/transpose_implementations v-struct {{reps}}'
+    echo "Debug (for compiler insights, mostly):"
+    hyperfine --warmup 3 'target/debug/transpose_implementations recopy {{reps}}'
+    hyperfine --warmup 3 'target/debug/transpose_implementations v-struct {{reps}}'
+
 # generate a `.env` file to place your database path in.
 gen-env:
     @echo "{{CYN}}The {{GRN}}.env DATABASE_URL value{{CYN}}will populate your database path when needed.  Please edit the file to manually specify."
     @echo {{ if path_exists(".env") == "true" { `echo "\(.env file already exists\)"` } else { `cp 'template.env' '.env'; echo "\(.env file created\)"`} }}
-    
+
 
 # Pull local schema to dir to allow off-line building.
 sqlx-prep:
     cargo install sqlx-cli
     @echo "Database path required to pull schema."
     cargo sqlx prepare -- --all-targets --all-features
-    
+
 # Enter MySQL instance "remotely" with container.
 mysql:
     @echo "try: 'SHOW DATABASES; USE university; SHOW TABLES; SELECT * FROM STUDENTS;'"
@@ -74,7 +83,7 @@ mysql:
 
 # Run the Docker compose file.
 docker-comp:
-    docker compose --file data/db_gen/docker-compose.yaml up --detach 
+    docker compose --file data/db_gen/docker-compose.yaml up --detach
     docker image ls
     docker container ls
 
@@ -82,11 +91,11 @@ docker-comp:
 docker-build:
     docker build --tag {{IMAGE_AND_TAG}} data/db_gen/.
     docker image ls | recolor '({{IMAGE_AND_TAG}})'
- 
+
 # Run Docker image.
 docker-run:
     docker image ls
-    docker run --publish {{HOST_PORT}}:3306 --name={{CONT}} {{IMAGE_AND_TAG}}     
+    docker run --publish {{HOST_PORT}}:3306 --name={{CONT}} {{IMAGE_AND_TAG}}
     docker container ls
     echo "Checking port for listening Daemon (containerized mysql server would be a positive hit)"
     nc -zv 127.0.0.1 {{HOST_PORT}}
@@ -114,7 +123,7 @@ freeze FILE:
 
 # Unfreeze a file. (removes 'FROZE...FROZE-' tag from filename)
 thaw FILE:
-	echo {{FILE}} | sd '{{froze_sha_regex}}' '' | xargs mv -iv {{FILE}} 
+	echo {{FILE}} | sd '{{froze_sha_regex}}' '' | xargs mv -iv {{FILE}}
 
 # Find local file(s) through the ice.
 arctic_recon ICELESS_NAME:
@@ -134,5 +143,3 @@ _sha FILE:
 # Example function for syntax reference
 _example_file_exists_test file:
     echo {{ if path_exists(file) == "true" { "hello" } else { "goodbye" } }}
-        
-

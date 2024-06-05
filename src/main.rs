@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use derive_more::Display;
-use futures::{StreamExt, TryStreamExt};
+use futures::TryStreamExt;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{FromRow, Row};
 
@@ -161,6 +161,7 @@ WHERE e.Grade = ?
     Ok(())
 }
 
+#[allow(dead_code)]
 /// TODO(match School ENUM in students)
 enum School {
     Sciences,

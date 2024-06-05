@@ -32,45 +32,35 @@ _ : unchecked
 FromRow : for use with ***un**checked* query_as (not query*, not !)
 
 
-## quick times record
+## Bench
+Quick, rough.  No notable differences across data crunch sizes tested. (1..10_000)
 
 **Takeaway**: no difference in perf between Vec<Struct> ~~> Polars::DataFrame and Struct<Vec<Field>> ~~> Polars::DataFrame
 (would be nice to check allocations at somepoint, but not worth tooling play to do [re: async bench limitations])
 
 ```shell
-~/coding_dirs/rust/xp-sqlx on  master [!] is 📦 v0.1.0 via 🦀 v1.80.0-nightly
+~/coding_dirs/rust/xp-sqlx on  master [!+] is 📦 v0.1.0 via 🦀 v1.80.0-nightly took 6m41s
 ❮ j hyperf 100
-NOTE: we only care about 'recopy' and 'vstruct', 'direct' does not do DF creation, 'all' was quick substitution bench framework
+NOTE: we only care about 'recopy' and 'vstruct'; 'direct' does not do DF creation, 'all' was quick substitution bench framework
 Release:
 hyperfine --warmup 3 'target/release/transpose_implementations recopy 100'
 Benchmark 1: target/release/transpose_implementations recopy 100
-  Time (mean ± σ):      72.0 ms ±   6.1 ms    [User: 13.6 ms, System: 8.4 ms]
-  Range (min … max):    59.8 ms …  95.5 ms    34 runs
-
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):      69.4 ms ±   3.8 ms    [User: 13.4 ms, System: 7.8 ms]
+  Range (min … max):    60.5 ms …  78.7 ms    36 runs
 
 hyperfine --warmup 3 'target/release/transpose_implementations v-struct 100'
 Benchmark 1: target/release/transpose_implementations v-struct 100
-  Time (mean ± σ):      71.3 ms ±   3.1 ms    [User: 14.8 ms, System: 8.7 ms]
-  Range (min … max):    65.8 ms …  76.9 ms    34 runs
+  Time (mean ± σ):      71.1 ms ±   3.4 ms    [User: 14.7 ms, System: 8.0 ms]
+  Range (min … max):    63.0 ms …  76.4 ms    35 runs
 
 Debug (for compiler insights, mostly):
 hyperfine --warmup 3 'target/debug/transpose_implementations recopy 100'
 Benchmark 1: target/debug/transpose_implementations recopy 100
-  Time (mean ± σ):     255.1 ms ±  16.8 ms    [User: 99.3 ms, System: 17.5 ms]
-  Range (min … max):   219.7 ms … 290.1 ms    11 runs
+  Time (mean ± σ):     212.0 ms ±  43.4 ms    [User: 83.4 ms, System: 14.2 ms]
+  Range (min … max):   129.3 ms … 262.1 ms    15 runs
 
 hyperfine --warmup 3 'target/debug/transpose_implementations v-struct 100'
 Benchmark 1: target/debug/transpose_implementations v-struct 100
-  Time (mean ± σ):     218.8 ms ±  29.9 ms    [User: 84.3 ms, System: 13.9 ms]
-  Range (min … max):   141.3 ms … 255.3 ms    15 runs
-```
-
-Times Recorded (ms):
-```
-TimesTaken {
-    direct: 46_692,  <-- not even converted to a dataframe
-    vstruct: 28_609,
-    recopy: 58_234,
-}
+  Time (mean ± σ):     244.2 ms ±  24.7 ms    [User: 92.3 ms, System: 16.0 ms]
+  Range (min … max):   206.4 ms … 284.9 ms    10 runs
 ```

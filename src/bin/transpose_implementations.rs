@@ -50,9 +50,7 @@ async fn main() -> Result<(), sqlx::Error> {
     let now = Instant::now();
     match args.implementation {
         TransImpl::Direct => direct_transpose(reps).await?,
-
         TransImpl::VStruct => recopy_transpose(reps).await?,
-
         TransImpl::Recopy => vstruct_transpose(reps).await?,
         TransImpl::All => {
             let mut elapsed_times_struct = TimesTaken::new(0, 0, 0);

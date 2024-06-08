@@ -40,32 +40,52 @@ async fn main() -> Result<(), sqlx::Error> {
     let pool = MySqlPoolOptions::new().max_connections(2)
                                       .connect("mysql://root:root@127.0.0.1/university")
                                       .await?;
+    println!("~~~~~~~~~~~~~~~");
+    students_10_qa(&pool).await?;
 
-    // query_as!
+    println!("~~~~~~~~~~~~~~~");
+    students_wid_qa(&pool).await?;
 
-    println!("-------------------");
-    // WARN: file paths must be given literally
-    //       there are no ergonomic management options
+    println!("~~~~~~~~~~~~~~~");
+    students_10_q(&pool).await?;
+
+    Ok(())
+}
+
+// Options : A, B, C
+// get selection "x"
+// if x --> fetch.file(x), fetch.pre-query(x), fetch.params(x)
+// present file, pre-query, params
+// get params "q,r,c"
+// if "x,y,c" --> query --> polars::DF
+
+/// query_as!
+/// WARN: file paths must be given literally
+///       there are no ergonomic management options
+async fn students_10_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
     let mut stream =
-        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_10.sql").fetch(&pool);
-    while let Some(student) = stream.try_next().await? {
-        print!("Student, {}", student);
-    }
-
-    println!("\n-------------------");
-    let mut stream =
-        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_w_id.sql", 12).fetch(&pool);
+        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_10.sql").fetch(pool);
     while let Some(student) = stream.try_next().await? {
         println!("Student, {}", student);
     }
+    Ok(())
+}
 
-    // query!
-    println!("-------------------");
-    println!("-------------------");
-    let mut stream = sqlx::query_file!("data/sql_queries/students_10.sql").fetch(&pool);
+/// query_as!
+async fn students_wid_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
+    let mut stream =
+        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_w_id.sql", 12).fetch(pool);
+    while let Some(student) = stream.try_next().await? {
+        println!("Student, {}", student);
+    }
+    Ok(())
+}
+
+/// query!
+async fn students_10_q(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
+    let mut stream = sqlx::query_file!("data/sql_queries/students_10.sql").fetch(pool);
     while let Some(row) = stream.try_next().await? {
         println!("Student, {:?}", row);
     }
-
     Ok(())
 }

@@ -12,6 +12,6 @@ fn main() {
     // Now you can directly use
     let my_data = vec![MyStruct { field1: 1,
                                   field2: "test".to_string(),
-                                  field3: 3.14, }];
+                                  field3: 3.12534, }];
     // let df = MyStruct::to_dataframe(my_data);
 }

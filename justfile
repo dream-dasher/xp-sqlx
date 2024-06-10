@@ -56,13 +56,13 @@ deps:
     xsv table ext_dependencies.csv
 
 hyperf reps:
-    @echo "{{PRP}}NOTE{{NC}}: we only care about 'recopy' and 'vstruct'; 'direct' does not do DF creation, 'all' was quick substitution bench framework"
+    @echo "{{PRP}}NOTE{{NC}}: we only care about 'v-of-struct' and 'struct-of-v'; 'all' was quick substitution bench framework"
     @echo "Release:"
-    hyperfine --warmup 3 'target/release/transpose_implementations recopy {{reps}}'
-    hyperfine --warmup 3 'target/release/transpose_implementations v-struct {{reps}}'
+    hyperfine --warmup 3 'target/release/transpose_implementations v-of-struct {{reps}}'
+    hyperfine --warmup 3 'target/release/transpose_implementations struct-of-v {{reps}}'
     @echo "Debug (for compiler insights, mostly):"
-    hyperfine --warmup 3 'target/debug/transpose_implementations recopy {{reps}}'
-    hyperfine --warmup 3 'target/debug/transpose_implementations v-struct {{reps}}'
+    hyperfine --warmup 3 'target/debug/transpose_implementations v-of-struct {{reps}}'
+    hyperfine --warmup 3 'target/debug/transpose_implementations struct-of-v {{reps}}'
 
 # generate a `.env` file to place your database path in.
 gen-env:

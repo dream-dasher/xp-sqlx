@@ -38,25 +38,25 @@ macro_rules! vstruct_to_dataframe {
     };
 }
 
-/// Student to use with `query_as!`
+/// Student to use with `query!`
 ///
-/// FromRow is **not** used by query_as!
-/// `query_as!` is rigid (and reliable) and easy
-/// but lacks customization options
+/// More work, and more potential for mistakes
+/// but more control than with `query_as!`
 #[derive(Debug, Display)]
-#[display(fmt = "StudentQA:{} Name: {} {} Born: {}",
-          "StudentID",
-          "FirstName.clone()",
-          "LastName.clone()",
-          "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
-#[allow(non_snake_case)]
-pub struct StudentQA {
-    StudentID:   i32,
-    FirstName:   String,
-    LastName:    String,
-    DateOfBirth: Option<NaiveDate>,
-    School:      Option<String>,
-    Email:       Option<String>,
+#[display(fmt = "StudentQ:{} Name: {} {} Born: {}",
+          "id",
+          "first_name",
+          "last_name",
+          "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
+struct StudentQA {
+    // this is part of FromRow, which query_as! does not use
+    // #[sqlx(rename = "StudentID")]
+    id:         i32,
+    first_name: String,
+    last_name:  String,
+    dob:        Option<NaiveDate>,
+    school:     Option<String>,
+    email:      Option<String>,
 }
 
 /// Vecs of each field
@@ -73,7 +73,7 @@ pub struct VecOfStudentQA {
 
 /// Vec<Struct> ~~> Polars::DataFrame
 #[inline]
-pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
+pub async fn v_of_struct_macro(repeat: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new().max_connections(5)
                                       .connect("mysql://root:root@127.0.0.1/university")
@@ -81,7 +81,17 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
 
     let mut student_vec = Vec::new();
     for _ in 0..repeat {
-        let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        // let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        let mut student_stream = sqlx::query_as!(StudentQA,
+                                                 r#"
+                                                    SELECT StudentID as id, 
+                                                           FirstName as first_name, 
+                                                           LastName as last_name, 
+                                                           DateOfBirth as dob, 
+                                                           School as school, 
+                                                           Email as email
+                                                    FROM students 
+                                                    "#,).fetch(&pool);
         while let Some(student) = student_stream.try_next().await? {
             student_vec.push(student);
         }
@@ -90,12 +100,7 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
     println!("{:?}", student_vec);
 
     #[allow(non_snake_case)]
-    let df = struct_to_dataframe!(student_vec, [StudentID,
-                                                FirstName,
-                                                LastName,
-                                                DateOfBirth,
-                                                School,
-                                                Email]);
+    let df = struct_to_dataframe!(student_vec, [id, first_name, last_name, dob, school, email]);
 
     println!("\n\nDataframe:\n{:?}", df);
 
@@ -104,7 +109,7 @@ pub async fn recopy_transpose(repeat: u32) -> Result<(), sqlx::Error> {
 
 /// Struct<vecs> ~~> Polars::DataFrame
 #[inline]
-pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
+pub async fn struct_of_v_macro(repeats: u32) -> Result<(), sqlx::Error> {
     // Connection Pool
     let pool = MySqlPoolOptions::new().max_connections(5)
                                       .connect("mysql://root:root@127.0.0.1/university")
@@ -119,14 +124,24 @@ pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
                                        school:        Vec::new(),
                                        email:         Vec::new(), };
     for _ in 0..repeats {
-        let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        // let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        let mut student_stream = sqlx::query_as!(StudentQA,
+                                                 r#"
+                                                    SELECT StudentID as id, 
+                                                           FirstName as first_name, 
+                                                           LastName as last_name, 
+                                                           DateOfBirth as dob, 
+                                                           School as school, 
+                                                           Email as email
+                                                    FROM students 
+                                                    "#,).fetch(&pool);
         while let Some(student) = student_stream.try_next().await? {
-            vstruct.student_id.push(student.StudentID);
-            vstruct.first_name.push(student.FirstName);
-            vstruct.last_name.push(student.LastName);
-            vstruct.date_of_birth.push(student.DateOfBirth);
-            vstruct.school.push(student.School);
-            vstruct.email.push(student.Email);
+            vstruct.student_id.push(student.id);
+            vstruct.first_name.push(student.first_name);
+            vstruct.last_name.push(student.last_name);
+            vstruct.date_of_birth.push(student.dob);
+            vstruct.school.push(student.school);
+            vstruct.email.push(student.email);
         }
     }
 
@@ -144,39 +159,18 @@ pub async fn vstruct_transpose(repeats: u32) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-/// Directly creating n Vec<field>s then creating a DataFrame
-#[inline]
-pub async fn direct_transpose(repeat: u32) -> Result<(), sqlx::Error> {
-    // Connection Pool
-    let pool = MySqlPoolOptions::new().max_connections(5)
-                                      .connect("mysql://root:root@127.0.0.1/university")
-                                      .await?;
+// pub async series_to_dataframe(repeats: u32) -> Result<(), sqlx::Error> {
+//     // Connection Pool
+//     let pool = MySqlPoolOptions::new().max_connections(5)
+//                                       .connect("mysql://root:root@
 
-    // making vecs manually
-    let mut student_ids: Vec<i32> = Vec::new();
-    let mut first_names: Vec<String> = Vec::new();
-    let mut last_names: Vec<String> = Vec::new();
-    let mut dates_of_birth: Vec<Option<NaiveDate>> = Vec::new();
-    let mut schools: Vec<Option<String>> = Vec::new();
-    let mut emails: Vec<Option<String>> = Vec::new();
+//                                               // Convert struct instances to Series
+//                                               let id_series = Series::new("a", records.iter().map(|r| r.id).collect::<Vec<_>>());
+//                                               let name_series = Series::new("b",
+//                                                                             records.iter().map(|r| &r.name).cloned().collect::<Vec<_>>());
+//                                               let active_series = Series::new("c", records.iter().map(|r| r.active).collect::<Vec<_>>());
 
-    for _ in 0..repeat {
-        let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
-        while let Some(student) = student_stream.try_next().await? {
-            student_ids.push(student.StudentID);
-            first_names.push(student.FirstName);
-            last_names.push(student.LastName);
-            dates_of_birth.push(student.DateOfBirth);
-            schools.push(student.School);
-            emails.push(student.Email);
-        }
-    }
-    println!("field StudentId:\n{:?}\n", student_ids);
-    println!("field FirstName:\n{:?}\n", first_names);
-    println!("field LastName:\n{:?}\n", last_names);
-    println!("field DateOfBirth:\n{:?}\n", dates_of_birth);
-    println!("field School:\n{:?}\n", schools);
-    println!("field Email:\n{:?}\n", emails);
-
-    Ok(())
-}
+//                                               // Create a DataFrame
+//                                               let df = DataFrame::new(vec![id_series, name_series, active_series]).unwrap();
+//                                               println!("{:?}", df);
+//     }

@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
-use xp_sqlx::stream_to_df::{direct_transpose, recopy_transpose, vstruct_transpose};
+use xp_sqlx::stream_to_df::{struct_of_v_macro, v_of_struct_macro};
 
 /// Arguments to select MemoryTranspose Implementations and Repetition of DB draws (increasing data transposed)
 /// Principally for use with Hyperfine to do benchmarking.
@@ -25,22 +25,19 @@ struct Args {
 
 #[derive(ValueEnum, Clone, Debug)]
 enum TransImpl {
-    Direct,
-    Recopy,
+    StructOfV,
     // set to 'v-struct', but not worth hunting for more syntax to get rename = "lower" to work
-    VStruct,
+    VOfStruct,
     All,
 }
 
 #[derive(Debug, Constructor, Display)]
-#[display(fmt = "Direct impl time: {}\nRecopy impl time: {}\nVStruct impl time: {}",
-          direct,
-          recopy,
-          vstruct)]
+#[display(fmt = "Vec<Struct>_macro! impl time: {}\nStruct<Vec<field>...>_macro! impl time: {}",
+          v_of_struct_macro,
+          struct_of_v_macro)]
 struct TimesTaken {
-    pub direct:  u128,
-    pub vstruct: u128,
-    pub recopy:  u128,
+    pub struct_of_v_macro: u128,
+    pub v_of_struct_macro: u128,
 }
 
 #[tokio::main]
@@ -50,28 +47,22 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let now = Instant::now();
     match args.implementation {
-        TransImpl::Direct => direct_transpose(reps).await?,
-        TransImpl::VStruct => recopy_transpose(reps).await?,
-        TransImpl::Recopy => vstruct_transpose(reps).await?,
+        TransImpl::VOfStruct => v_of_struct_macro(reps).await?,
+        TransImpl::StructOfV => struct_of_v_macro(reps).await?,
         TransImpl::All => {
-            let mut elapsed_times_struct = TimesTaken::new(0, 0, 0);
+            let mut elapsed_times_struct = TimesTaken::new(0, 0);
 
             let now = Instant::now();
-            direct_transpose(reps).await?;
+            v_of_struct_macro(reps).await?;
             let elapsed_time = now.elapsed();
-            elapsed_times_struct.direct = elapsed_time.as_millis();
+            elapsed_times_struct.v_of_struct_macro = elapsed_time.as_millis();
 
             let now = Instant::now();
-            recopy_transpose(reps).await?;
+            struct_of_v_macro(reps).await?;
             let elapsed_time = now.elapsed();
-            elapsed_times_struct.recopy = elapsed_time.as_millis();
+            elapsed_times_struct.struct_of_v_macro = elapsed_time.as_millis();
 
-            let now = Instant::now();
-            vstruct_transpose(reps).await?;
-            let elapsed_time = now.elapsed();
-            elapsed_times_struct.vstruct = elapsed_time.as_millis();
-
-            println!("\n\nTimes Elapsed: {}", elapsed_times_struct);
+            println!("\n\nTimes Elapsed:\n{}", elapsed_times_struct);
         }
     };
 

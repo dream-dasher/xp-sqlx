@@ -39,28 +39,27 @@ No notable differences across data crunch sizes tested. (1..10_000)
 (would be nice to check allocations at somepoint, but not worth tooling play to do [re: async bench limitations])
 
 ```shell
-~/coding_dirs/rust/xp-sqlx on  master [!+] is 📦 v0.1.0 via 🦀 v1.80.0-nightly took 6m41s
-❮ j hyperf 100
-NOTE: we only care about 'recopy' and 'vstruct'; 'direct' does not do DF creation, 'all' was quick substitution bench framework
+~/coding_dirs/rust/xp-sqlx on  master via 🦀 v1.81.0-nightly took 13s
+❮ j hyperf 10
+NOTE: we only care about 'v-of-struct' and 'struct-of-v'; 'all' was quick substitution bench framework
 Release:
-hyperfine --warmup 3 'target/release/transpose_implementations recopy 100'
-Benchmark 1: target/release/transpose_implementations recopy 100
-  Time (mean ± σ):      69.4 ms ±   3.8 ms    [User: 13.4 ms, System: 7.8 ms]
-  Range (min … max):    60.5 ms …  78.7 ms    36 runs
+hyperfine --warmup 3 'target/release/transpose_implementations v-of-struct 10'
+Benchmark 1: target/release/transpose_implementations v-of-struct 10
+  Time (mean ± σ):      18.8 ms ±   0.5 ms    [User: 3.8 ms, System: 3.2 ms]
+  Range (min … max):    17.6 ms …  20.5 ms    138 runs
 
-hyperfine --warmup 3 'target/release/transpose_implementations v-struct 100'
-Benchmark 1: target/release/transpose_implementations v-struct 100
-  Time (mean ± σ):      71.1 ms ±   3.4 ms    [User: 14.7 ms, System: 8.0 ms]
-  Range (min … max):    63.0 ms …  76.4 ms    35 runs
+hyperfine --warmup 3 'target/release/transpose_implementations struct-of-v 10'
+Benchmark 1: target/release/transpose_implementations struct-of-v 10
+  Time (mean ± σ):      18.6 ms ±   0.6 ms    [User: 3.7 ms, System: 3.1 ms]
+  Range (min … max):    17.6 ms …  22.6 ms    145 runs
 
 Debug (for compiler insights, mostly):
-hyperfine --warmup 3 'target/debug/transpose_implementations recopy 100'
-Benchmark 1: target/debug/transpose_implementations recopy 100
-  Time (mean ± σ):     212.0 ms ±  43.4 ms    [User: 83.4 ms, System: 14.2 ms]
-  Range (min … max):   129.3 ms … 262.1 ms    15 runs
+hyperfine --warmup 3 'target/debug/transpose_implementations v-of-struct 10'
+Benchmark 1: target/debug/transpose_implementations v-of-struct 10
+  Time (mean ± σ):      36.3 ms ±   2.8 ms    [User: 12.9 ms, System: 3.9 ms]
+  Range (min … max):    29.4 ms …  42.3 ms    95 runs
 
-hyperfine --warmup 3 'target/debug/transpose_implementations v-struct 100'
-Benchmark 1: target/debug/transpose_implementations v-struct 100
-  Time (mean ± σ):     244.2 ms ±  24.7 ms    [User: 92.3 ms, System: 16.0 ms]
-  Range (min … max):   206.4 ms … 284.9 ms    10 runs
-```
+hyperfine --warmup 3 'target/debug/transpose_implementations struct-of-v 10'
+Benchmark 1: target/debug/transpose_implementations struct-of-v 10
+  Time (mean ± σ):      36.1 ms ±   3.4 ms    [User: 12.8 ms, System: 4.0 ms]
+  Range (min … max):    27.8 ms …  41.8 ms    70 runs```

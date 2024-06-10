@@ -15,7 +15,7 @@ use sqlx::{mysql::MySqlPoolOptions, FromRow, Row};
           "LastName.clone().unwrap_or_default()",
           "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 #[allow(non_snake_case)]
-struct StudentQA {
+struct StudentQAMacro {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
     StudentID:   Option<i32>,
@@ -35,7 +35,7 @@ struct StudentQA {
           "first_name.clone().unwrap_or_default()",
           "last_name.clone().unwrap_or_default()",
           "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
-struct StudentQ {
+struct StudentQAFunc {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
     #[sqlx(rename = "StudentID")]
@@ -59,7 +59,7 @@ async fn main() -> Result<(), sqlx::Error> {
                                       .connect("mysql://root:root@127.0.0.1/university")
                                       .await?;
 
-    let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+    let mut student_stream = sqlx::query_as!(StudentQAMacro, "SELECT * FROM students").fetch(&pool);
     while let Some(student) = student_stream.try_next().await? {
         println!("Student, {}", student);
     }
@@ -71,23 +71,24 @@ async fn main() -> Result<(), sqlx::Error> {
         println!("First name: {}", first_name);
     }
 
-    let student_qa =
-        sqlx::query_as!(StudentQA, "SELECT * FROM students WHERE StudentID =?", 5).fetch_one(&pool)
-                                                                                  .await?;
+    let student_qa_macro = sqlx::query_as!(StudentQAMacro,
+                                           "SELECT * FROM students WHERE StudentID =?",
+                                           5).fetch_one(&pool)
+                                             .await?;
 
     println!("-------------------------");
-    println!("------ Query _ AS  ! ------");
-    println!("{}", student_qa);
+    println!("------ Query _ AS  ! (macro)------");
+    println!("{}", student_qa_macro);
     println!("-------------------------");
     // ////////////////////////
 
-    let student_q: StudentQ =
+    let student_qa_func: StudentQAFunc =
         sqlx::query_as("SELECT * FROM students WHERE StudentID = 5").fetch_one(&pool)
                                                                     .await?;
 
     println!("-------------------------");
-    println!("------ Query _ AS    ------");
-    println!("{}", student_q);
+    println!("------ Query _ AS (func)   ------");
+    println!("{}", student_qa_func);
     println!("-------------------------");
 
     // Note: 'INT' minimally is i32, but may also be i64

@@ -16,10 +16,14 @@ use std::path::Path;
 use chrono::NaiveDate;
 use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
-use dialoguer::Select;
+use dialoguer::{Input, Select};
 use futures::TryStreamExt;
 use include_dir::{include_dir, Dir};
-use sqlx::{mysql::MySqlPoolOptions, FromRow, Row};
+use sqlx::{mysql::{MySqlArguments, MySqlPoolOptions},
+           query::Query,
+           Arguments,
+           Either::*,
+           Execute, Executor, FromRow, MySql, Row, Statement};
 
 /// Student to use with `query!`
 ///
@@ -138,26 +142,43 @@ async fn main() -> Result<(), sqlx::Error> {
                                      .interact()
                                      .expect("dialogue to work");
         dbg!(&selection);
-
+        let str_query = files[selection].contents_utf8().expect("utf8 file");
         println!("You chose: {}", file_paths[selection]);
-        println!("Contents :\n{}",
-                 files[selection].contents_utf8().expect("utf8 file"));
+        println!("Contents :\n{}", str_query);
 
-        // TODO: dynamically determine params?
-        let rows = match selection {
-            0 => {
-                sqlx::query(files[selection].contents_utf8().expect("utf8 file")).fetch_all(&pool)
-            }
-            1 => {
-                sqlx::query(files[selection].contents_utf8().expect("utf8 file")).bind(8)
-                                                                                 .fetch_all(&pool)
-            }
-            _ => unimplemented!("no other files"),
-        }.await?;
+        // get prepared statement
+        // get parameters for statement
+        let statement = pool.prepare(str_query).await?;
+        let params = statement.parameters();
+        let cols = statement.columns();
+        dbg!(&statement);
+        println!("Parameters, if sany: {:?}", params);
+        println!("Columns: {:?}", cols);
 
-        rows.iter()
-            .enumerate()
-            .for_each(|(i, r)| println!("row {}: {:?}", i, r));
+        // extract num params
+        let param_number = match params {
+            Some(either) => match either {
+                Left(slice) => slice.len(),
+                Right(size) => size,
+            },
+            None => 0,
+        };
+
+        let mut arguments = MySqlArguments::default();
+        for p in 0..param_number {
+            let param: String = Input::new().with_prompt("Enter Parameter:")
+                                            .interact_text()
+                                            .unwrap();
+            arguments.add(param);
+        }
+
+        let resp = statement.query_with(arguments).fetch_all(&pool).await?;
+        println!("---------------------------");
+        println!("Response:\n{:?}", resp);
+
+        // rows.iter()
+        //     .enumerate()
+        //     .for_each(|(i, r)| println!("row {}: {:?}", i, r));
     }
 
     Ok(())

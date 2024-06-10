@@ -45,15 +45,15 @@ macro_rules! vstruct_to_dataframe {
 /// but lacks customization options
 #[derive(Debug, Display)]
 #[display(fmt = "StudentQA:{} Name: {} {} Born: {}",
-          "StudentID.unwrap_or_default()",
-          "FirstName.clone().unwrap_or_default()",
-          "LastName.clone().unwrap_or_default()",
+          "StudentID",
+          "FirstName.clone()",
+          "LastName.clone()",
           "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 #[allow(non_snake_case)]
 pub struct StudentQA {
-    StudentID:   Option<i32>,
-    FirstName:   Option<String>,
-    LastName:    Option<String>,
+    StudentID:   i32,
+    FirstName:   String,
+    LastName:    String,
     DateOfBirth: Option<NaiveDate>,
     School:      Option<String>,
     Email:       Option<String>,
@@ -63,9 +63,9 @@ pub struct StudentQA {
 /// to transpose the memory representation
 #[derive(Debug)]
 pub struct VecOfStudentQA {
-    pub student_id:    Vec<Option<i32>>,
-    pub first_name:    Vec<Option<String>>,
-    pub last_name:     Vec<Option<String>>,
+    pub student_id:    Vec<i32>,
+    pub first_name:    Vec<String>,
+    pub last_name:     Vec<String>,
     pub date_of_birth: Vec<Option<NaiveDate>>,
     pub school:        Vec<Option<String>>,
     pub email:         Vec<Option<String>>,
@@ -153,9 +153,9 @@ pub async fn direct_transpose(repeat: u32) -> Result<(), sqlx::Error> {
                                       .await?;
 
     // making vecs manually
-    let mut student_ids: Vec<Option<i32>> = Vec::new();
-    let mut first_names: Vec<Option<String>> = Vec::new();
-    let mut last_names: Vec<Option<String>> = Vec::new();
+    let mut student_ids: Vec<i32> = Vec::new();
+    let mut first_names: Vec<String> = Vec::new();
+    let mut last_names: Vec<String> = Vec::new();
     let mut dates_of_birth: Vec<Option<NaiveDate>> = Vec::new();
     let mut schools: Vec<Option<String>> = Vec::new();
     let mut emails: Vec<Option<String>> = Vec::new();

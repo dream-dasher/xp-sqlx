@@ -6,8 +6,7 @@ use std::time::Instant;
 use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
 use xp_sqlx::stream_to_df::{direct_transpose, recopy_transpose, vstruct_transpose};
-#[derive(Parser, Debug)]
-#[command(version, about)]
+
 /// Arguments to select MemoryTranspose Implementations and Repetition of DB draws (increasing data transposed)
 /// Principally for use with Hyperfine to do benchmarking.
 /// (Preferred benchmarking framework (Divan) does not currently support async operations.)
@@ -15,6 +14,8 @@ use xp_sqlx::stream_to_df::{direct_transpose, recopy_transpose, vstruct_transpos
 /// Note: This requires an active DataBase on a specific port.
 /// Justfile in the associatted repo has docker create and destroy code to set one up.
 /// `template.env` has default address for the dockerized DB
+#[derive(Parser, Debug)]
+#[command(version, about)]
 struct Args {
     /// Select the implementation to test
     implementation: TransImpl,

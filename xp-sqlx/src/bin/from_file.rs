@@ -67,7 +67,7 @@ async fn main() -> Result<(), sqlx::Error> {
 ///       there are no ergonomic management options
 async fn students_10_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
     let mut stream =
-        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_10.sql").fetch(pool);
+        sqlx::query_file_as!(StudentQA, "../data/sql_queries/students_10.sql").fetch(pool);
     while let Some(student) = stream.try_next().await? {
         println!("Student, {}", student);
     }
@@ -77,7 +77,7 @@ async fn students_10_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
 /// query_as!
 async fn students_wid_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
     let mut stream =
-        sqlx::query_file_as!(StudentQA, "data/sql_queries/students_w_id.sql", 12).fetch(pool);
+        sqlx::query_file_as!(StudentQA, "../data/sql_queries/students_w_id.sql", 12).fetch(pool);
     while let Some(student) = stream.try_next().await? {
         println!("Student, {}", student);
     }
@@ -86,7 +86,7 @@ async fn students_wid_qa(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
 
 /// query!
 async fn students_10_q(pool: &sqlx::MySqlPool) -> Result<(), sqlx::Error> {
-    let mut stream = sqlx::query_file!("data/sql_queries/students_10.sql").fetch(pool);
+    let mut stream = sqlx::query_file!("../data/sql_queries/students_10.sql").fetch(pool);
     while let Some(row) = stream.try_next().await? {
         println!("Student, {:?}", row);
     }

@@ -170,7 +170,7 @@ WHERE e.Grade = ?
                             .collect();
 
     println!("---------------");
-    println!("{:?}", row_2);
+    println!("{:?}", &row_2);
 
     // query -> columns
     // for each column -> type, name

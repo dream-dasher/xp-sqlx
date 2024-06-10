@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
-use xp_sqlx::stream_to_df::{struct_of_v_macro, v_of_struct_macro};
+use xp_sqlx::stream_to_df::{series_to_dataframe, struct_of_v_macro, v_of_struct_macro};
 
 /// Arguments to select MemoryTranspose Implementations and Repetition of DB draws (increasing data transposed)
 /// Principally for use with Hyperfine to do benchmarking.
@@ -28,7 +28,7 @@ enum TransImpl {
     StructOfV,
     // set to 'v-struct', but not worth hunting for more syntax to get rename = "lower" to work
     VOfStruct,
-    All,
+    SeriesToDF,
 }
 
 #[derive(Debug, Constructor, Display)]
@@ -49,21 +49,7 @@ async fn main() -> Result<(), sqlx::Error> {
     match args.implementation {
         TransImpl::VOfStruct => v_of_struct_macro(reps).await?,
         TransImpl::StructOfV => struct_of_v_macro(reps).await?,
-        TransImpl::All => {
-            let mut elapsed_times_struct = TimesTaken::new(0, 0);
-
-            let now = Instant::now();
-            v_of_struct_macro(reps).await?;
-            let elapsed_time = now.elapsed();
-            elapsed_times_struct.v_of_struct_macro = elapsed_time.as_millis();
-
-            let now = Instant::now();
-            struct_of_v_macro(reps).await?;
-            let elapsed_time = now.elapsed();
-            elapsed_times_struct.struct_of_v_macro = elapsed_time.as_millis();
-
-            println!("\n\nTimes Elapsed:\n{}", elapsed_times_struct);
-        }
+        TransImpl::SeriesToDF => series_to_dataframe(reps).await?,
     };
 
     let elapsed_time = now.elapsed();

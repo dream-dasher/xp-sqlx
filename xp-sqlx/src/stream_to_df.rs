@@ -159,18 +159,53 @@ pub async fn struct_of_v_macro(repeats: u32) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-// pub async series_to_dataframe(repeats: u32) -> Result<(), sqlx::Error> {
-//     // Connection Pool
-//     let pool = MySqlPoolOptions::new().max_connections(5)
-//                                       .connect("mysql://root:root@
+pub async fn series_to_dataframe(repeats: u32) -> Result<(), sqlx::Error> {
+    // Connection Pool
+    let pool = MySqlPoolOptions::new().max_connections(5)
+                                      .connect("mysql://root:root@127.0.0.1/university")
+                                      .await?;
 
-//                                               // Convert struct instances to Series
-//                                               let id_series = Series::new("a", records.iter().map(|r| r.id).collect::<Vec<_>>());
-//                                               let name_series = Series::new("b",
-//                                                                             records.iter().map(|r| &r.name).cloned().collect::<Vec<_>>());
-//                                               let active_series = Series::new("c", records.iter().map(|r| r.active).collect::<Vec<_>>());
+    let mut student_vec = Vec::new();
+    for _ in 0..repeats {
+        // let mut student_stream = sqlx::query_as!(StudentQA, "SELECT * FROM students").fetch(&pool);
+        let mut student_stream = sqlx::query_as!(StudentQA,
+                                                 r#"
+                                                    SELECT StudentID as id, 
+                                                           FirstName as first_name, 
+                                                           LastName as last_name, 
+                                                           DateOfBirth as dob, 
+                                                           School as school, 
+                                                           Email as email
+                                                    FROM students 
+                                                    "#,).fetch(&pool);
+        while let Some(student) = student_stream.try_next().await? {
+            student_vec.push(student);
+        }
+    }
+    let ids = Series::new("id", student_vec.iter().map(|r| r.id).collect::<Vec<_>>());
+    let first_names = Series::new("first_name",
+                                  student_vec.iter()
+                                             .map(|r| &r.first_name)
+                                             .cloned()
+                                             .collect::<Vec<_>>());
+    let last_names = Series::new("last_name",
+                                 student_vec.iter()
+                                            .map(|r| &r.last_name)
+                                            .cloned()
+                                            .collect::<Vec<_>>());
+    let dobs = Series::new("dob", student_vec.iter().map(|r| r.dob).collect::<Vec<_>>());
+    let schools = Series::new("school",
+                              student_vec.iter()
+                                         .map(|r| r.school.clone())
+                                         .collect::<Vec<_>>());
+    let emails = Series::new("email",
+                             student_vec.iter()
+                                        .map(|r| r.email.clone())
+                                        .collect::<Vec<_>>());
 
-//                                               // Create a DataFrame
-//                                               let df = DataFrame::new(vec![id_series, name_series, active_series]).unwrap();
-//                                               println!("{:?}", df);
-//     }
+    // Create a DataFrame
+    let df = DataFrame::new(vec![ids, first_names, last_names, dobs, schools, emails]).expect("f creation fine");
+    println!("{:?}", df);
+
+    Ok(())
+}

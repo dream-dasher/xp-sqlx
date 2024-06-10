@@ -17,22 +17,25 @@ use sqlx::mysql::MySqlPoolOptions;
 /// FromRow is **not** used by query_as!
 /// `query_as!` is rigid (and reliable) and easy
 /// but lacks customization options
-#[derive(Debug, Display, sqlx::FromRow)]
-#[display(fmt = "StudentQA:{} Name: {} {} Born: {}",
-          "StudentID.unwrap_or_default()",
-          "FirstName.clone().unwrap_or_default()",
-          "LastName.clone().unwrap_or_default()",
-          "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
-#[allow(non_snake_case)]
+/// Student to use with `query!`
+///
+/// More work, and more potential for mistakes
+/// but more control than with `query_as!`
+#[derive(Debug, Display)]
+#[display(fmt = "StudentQ:{} Name: {} {} Born: {}",
+          "id",
+          "first_name.clone().unwrap_or_default()",
+          "last_name.clone().unwrap_or_default()",
+          "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 struct StudentQA {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
-    StudentID:   Option<i32>,
-    FirstName:   Option<String>,
-    LastName:    Option<String>,
-    DateOfBirth: Option<NaiveDate>,
-    School:      Option<String>,
-    Email:       Option<String>,
+    id:         i32,
+    first_name: Option<String>,
+    last_name:  Option<String>,
+    dob:        Option<NaiveDate>,
+    school:     Option<String>,
+    email:      Option<String>,
 }
 
 #[tokio::main]

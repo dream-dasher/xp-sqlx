@@ -11,9 +11,12 @@
 //!
 //! Note: both macro and function queries will yield results -- though with the functions those results are possibly expected to check for a bit more.
 
+use std::path::Path;
+
 use chrono::NaiveDate;
 use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
+use dialoguer::Select;
 use futures::TryStreamExt;
 use include_dir::{include_dir, Dir};
 use sqlx::{mysql::MySqlPoolOptions, FromRow, Row};
@@ -49,12 +52,15 @@ struct StudentQA {
 #[derive(Parser, Debug)]
 #[command(version, about)]
 struct Args {
+    /// whether to dialogue for query
+    #[arg(short, long)]
+    interactive_query: bool,
     /// whether to run the static queries
     #[arg(short, long)]
-    static_queries: bool,
+    static_queries:    bool,
     /// whether to display query file inof
     #[arg(short, long)]
-    file_info:      bool,
+    file_info:         bool,
 }
 
 // include directory
@@ -123,5 +129,36 @@ async fn main() -> Result<(), sqlx::Error> {
     if !args.static_queries && !args.file_info {
         println!("No actions selected");
     }
+
+    if args.interactive_query {
+        let files: Vec<_> = SQL_QUERIES.files().collect();
+        let file_paths: Vec<_> = files.iter().map(|f| f.path().display()).collect();
+        let selection = Select::new().with_prompt("What do you choose?")
+                                     .items(&file_paths)
+                                     .interact()
+                                     .expect("dialogue to work");
+        dbg!(&selection);
+
+        println!("You chose: {}", file_paths[selection]);
+        println!("Contents :\n{}",
+                 files[selection].contents_utf8().expect("utf8 file"));
+
+        // TODO: dynamically determine params?
+        let rows = match selection {
+            0 => {
+                sqlx::query(files[selection].contents_utf8().expect("utf8 file")).fetch_all(&pool)
+            }
+            1 => {
+                sqlx::query(files[selection].contents_utf8().expect("utf8 file")).bind(8)
+                                                                                 .fetch_all(&pool)
+            }
+            _ => unimplemented!("no other files"),
+        }.await?;
+
+        rows.iter()
+            .enumerate()
+            .for_each(|(i, r)| println!("row {}: {:?}", i, r));
+    }
+
     Ok(())
 }

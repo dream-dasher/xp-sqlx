@@ -2,6 +2,7 @@
 
 # ===================================
 # Custom GitIgnore, Repo-specific
+.sqlx/*
 
 # ===================================
 # Custom GitIgnore, Boilerplate

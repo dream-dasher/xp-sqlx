@@ -1,7 +1,8 @@
 use chrono::NaiveDate;
 use derive_more::Display;
 use futures::TryStreamExt;
-use sqlx::{mysql::MySqlPoolOptions, FromRow, Row};
+use polars::{frame::DataFrame, prelude::*};
+use sqlx::{mysql::MySqlPoolOptions, Column, Execute, FromRow, Row};
 
 /// Student to use with `query_as!`
 ///
@@ -10,17 +11,17 @@ use sqlx::{mysql::MySqlPoolOptions, FromRow, Row};
 /// but lacks customization options
 #[derive(Debug, Display)]
 #[display(fmt = "StudentQA:{} Name: {} {} Born: {}",
-          "StudentID.unwrap_or_default()",
-          "FirstName.clone().unwrap_or_default()",
-          "LastName.clone().unwrap_or_default()",
+          "StudentID",
+          "FirstName",
+          "LastName",
           "DateOfBirth.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 #[allow(non_snake_case)]
 struct StudentQAMacro {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
-    StudentID:   Option<i32>,
-    FirstName:   Option<String>,
-    LastName:    Option<String>,
+    StudentID:   i32,
+    FirstName:   String,
+    LastName:    String,
     DateOfBirth: Option<NaiveDate>,
     School:      Option<String>,
     Email:       Option<String>,
@@ -31,19 +32,19 @@ struct StudentQAMacro {
 /// but more control than with `query_as!`
 #[derive(Debug, Display, FromRow)]
 #[display(fmt = "StudentQ:{} Name: {} {} Born: {}",
-          "id.unwrap_or_default()",
-          "first_name.clone().unwrap_or_default()",
-          "last_name.clone().unwrap_or_default()",
+          "id",
+          "first_name",
+          "last_name",
           "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 struct StudentQAFunc {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
     #[sqlx(rename = "StudentID")]
-    id:         Option<i32>,
+    id:         i32,
     #[sqlx(rename = "FirstName")]
-    first_name: Option<String>,
+    first_name: String,
     #[sqlx(rename = "LastName")]
-    last_name:  Option<String>,
+    last_name:  String,
     #[sqlx(rename = "DateOfBirth")]
     dob:        Option<NaiveDate>,
     #[sqlx(rename = "School")]
@@ -146,6 +147,34 @@ WHERE e.Grade = ?
                                                                      .await?;
     println!("Number of students: {}", row.0);
 
+    // ///////////////////////////////////////////////// //
+    //playing with row response
+    println!();
+    let sql = sqlx::query_unchecked!("SELECT * FROM enrollments WHERE EnrollmentID = ?", 5).sql();
+    println!("{}", sql);
+
+    let row_m1 =
+        sqlx::query!("SELECT * FROM enrollments WHERE EnrollmentID = ?", 1).fetch_one(&pool)
+                                                                           .await?;
+    println!("row_m1: {:?}", &row_m1);
+
+    let row_1 = sqlx::query("SELECT * FROM enrollments WHERE EnrollmentID = ?").bind("5")
+                                                                               .fetch_one(&pool)
+                                                                               .await?;
+    let row_2 = sqlx::query("SELECT * FROM enrollments WHERE EnrollmentID = ?").bind("6")
+                                                                               .fetch_one(&pool)
+                                                                               .await?;
+    let cols: Vec<_> = row_1.columns()
+                            .iter()
+                            .map(|col| col.name().to_string())
+                            .collect();
+
+    println!("---------------");
+    println!("{:?}", row_2);
+
+    // query -> columns
+    // for each column -> type, name
+    // df with above
     Ok(())
 }
 

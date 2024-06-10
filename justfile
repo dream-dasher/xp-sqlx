@@ -34,7 +34,7 @@ check:
     -cargo fmt
     -typos --exclude 'data/*'
     -committed
-    -cargo sqlx prepare --check
+    -cargo sqlx prepare --check --workspace
 
 # Watch a file: compile & run on changes.
 watch file_to_run:
@@ -74,7 +74,7 @@ gen-env:
 sqlx-prep:
     cargo install sqlx-cli
     @echo "Database path required to pull schema."
-    cargo sqlx prepare -- --all-targets --all-features
+    cargo sqlx prepare --workspace -- --all-targets --all-features
 
 # Enter MySQL instance "remotely" with container.
 mysql:

@@ -130,10 +130,6 @@ async fn main() -> Result<(), sqlx::Error> {
         println!();
     }
 
-    if !args.static_queries && !args.file_info {
-        println!("No actions selected");
-    }
-
     if args.interactive_query {
         let files: Vec<_> = SQL_QUERIES.files().collect();
         let file_paths: Vec<_> = files.iter().map(|f| f.path().display()).collect();
@@ -181,5 +177,8 @@ async fn main() -> Result<(), sqlx::Error> {
         //     .for_each(|(i, r)| println!("row {}: {:?}", i, r));
     }
 
+    if !args.static_queries && !args.file_info && !args.interactive_query {
+        println!("No actions selected");
+    }
     Ok(())
 }

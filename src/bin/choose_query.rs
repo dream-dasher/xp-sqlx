@@ -1,4 +1,4 @@
-//! [Manual File Inclusion] `_.sql` files to {file_name, param_list, maybe_output_fields, polars::DataFrame}
+//! `_.sql` files to {file_name, param_list, maybe_output_fields, polars::DataFrame}
 #![allow(unused)]
 //!
 //! There are two ways to do this.  Use of `query*!` macros is direct and gives compile time checking of the query-to-output type validity.

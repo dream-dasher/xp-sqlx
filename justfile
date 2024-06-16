@@ -55,6 +55,7 @@ deps:
     @echo "{{CYN}}List of external dependencies for this command runner:"
     xsv table ext_dependencies.csv
 
+# Benchmark cli-app wrapped code using Hyperfine.
 hyperf reps:
     @echo "{{ PRP }}Release{{ NC }}:--------------------------------------------------------"
     hyperfine --warmup 3 'target/release/transpose_implementations v-of-struct {{reps}}'

@@ -31,6 +31,10 @@ comparative times (for memory transpose approaches)
 - `!` : compile-time checing
 - `FromRow` : for use with ***un**checked* query_as (not query*, not !)
 
+## Docker Notes
+
+`docker run` : image ~~> container
+`docker start`: container(off) ~~> container(on)
 
 ## Bench
 No notable differences across data crunch sizes tested. (1..10_000)

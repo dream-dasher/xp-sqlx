@@ -80,7 +80,7 @@ sqlx-prep:
 
 # Enter MySQL instance "remotely" with container.
 mysql:
-    @echo "try: 'SHOW DATABASES; USE university; SHOW TABLES; SELECT * FROM STUDENTS;'"
+    @echo "{{CYN}}Try{{NC}}: '{{GRN}}SHOW DATABASES; USE university; SHOW TABLES; SELECT * FROM STUDENTS;{{NC}}'"
     mysql --host 127.0.0.1 --port {{HOST_PORT}} --user root --password=root
 
 # Run the Docker compose file.
@@ -99,9 +99,21 @@ docker-run:
     docker image ls
     docker run --publish {{HOST_PORT}}:3306 --name={{CONT}} {{IMAGE_AND_TAG}}
     docker container ls
-    echo "Checking port for listening Daemon (containerized mysql server would be a positive hit)"
+    echo "{{CYN}}Checking port for listening Daemon{{NC}} (containerized mysql server would be a positive hit)"
     nc -zv 127.0.0.1 {{HOST_PORT}}
 
+# Remove Docker image & container.
+[confirm]
+docker-remove:
+    docker image ls | recolor '({{IMAGE_AND_TAG}})'
+    @echo "{{GRN}}^^--------- images pre destroy ---------^^"
+    docker container ls | recolor '({{CONT}})'
+    @echo "{{GRN}}^^--------- containers pre destroy ---------^^"
+    -docker kill {{CONT}}
+    -docker container rm {{CONT}}
+    @echo "{{PRP}}vv--------- containers post destroy ---------vv"
+    docker container ls | recolor '({{CONT}})'
+    
 # Remove Docker image & container.
 [confirm]
 docker-destroy:

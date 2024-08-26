@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3",
+  "query": "SELECT subdomain FROM accounts WHERE subdomain REGEXP ? LIMIT 3",
   "describe": {
     "columns": [
       {
@@ -21,5 +21,5 @@
       false
     ]
   },
-  "hash": "fcfc2afe893139ec94d20945ce95090a6143a15db54d20fb6a24a076ed3be910"
+  "hash": "ed336e54093299e85a86d0d2d9b073245521bf9c15db5917e46aadec865de890"
 }

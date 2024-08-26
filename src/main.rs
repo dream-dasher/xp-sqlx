@@ -8,8 +8,8 @@ use sqlx::Row;
 #[derive(Parser, Debug)]
 #[command(version, about)]
 struct Args {
-    // like element to search for in subdomain names
-    likeness: String,
+    // Regex string to compare to `account.subdomain`
+    regex: String,
 }
 
 #[tokio::main]
@@ -24,7 +24,7 @@ async fn main() -> Result<(), sqlx::Error> {
         println!("\nPool corresponding to region: {:?}", region_str);
         let mut rows_dyn_fetch =
             sqlx::query("SELECT subdomain FROM accounts WHERE subdomain REGEXP ? LIMIT 3")
-                .bind(format!("{}", args.likeness))
+                .bind(format!("{}", args.regex))
                 .fetch(&pool);
 
         while let Some(row) = rows_dyn_fetch.try_next().await? {
@@ -39,7 +39,7 @@ async fn main() -> Result<(), sqlx::Error> {
         // NOTE: verified (macro) queries take param values as *arguments* rather than bind methods.
         let mut rows_stat_fetch = sqlx::query!(
             "SELECT subdomain FROM accounts WHERE subdomain REGEXP ? LIMIT 3",
-            format!("{}", args.likeness)
+            format!("{}", args.regex)
         )
         .fetch(&pool);
 

@@ -16,11 +16,12 @@ async fn main() -> Result<(), sqlx::Error> {
 
     // SDM gated US-prod_webDB
     let pool = MySqlPool::connect("mysql://127.0.0.1:13309/pagerduty_production").await?;
-    // let pool = MySqlPool::connect("mysql://root:root@127.0.0.1/student").await?;
+    // // SDM gated EU-prod_webDB
+    // let pool = MySqlPool::connect("mysql://127.0.0.1:13310/pagerduty_production").await?;
 
     let mut rows_dyn_fetch =
-        sqlx::query("SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3")
-            .bind(format!("%{}%", args.likeness))
+        sqlx::query("SELECT subdomain FROM accounts WHERE subdomain REGEXP ? LIMIT 3")
+            .bind(format!("{}", args.likeness))
             .fetch(&pool);
 
     while let Some(row) = rows_dyn_fetch.try_next().await? {
@@ -34,8 +35,8 @@ async fn main() -> Result<(), sqlx::Error> {
 
     // NOTE: verified (macro) queries take param values as *arguments* rather than bind methods.
     let mut rows_stat_fetch = sqlx::query!(
-        "SELECT subdomain FROM accounts WHERE subdomain LIKE ? LIMIT 3",
-        format!("%{}%", args.likeness)
+        "SELECT subdomain FROM accounts WHERE subdomain REGEXP ? LIMIT 3",
+        format!("{}", args.likeness)
     )
     .fetch(&pool);
 

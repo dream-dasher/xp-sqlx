@@ -34,6 +34,7 @@ check:
     -cargo fmt
     -typos --exclude 'data/*'
     -committed
+    @echo "{{GRN}}Note{{NC}}: this references {{BLU}}.env{{NC}} > \`{{BLU}}DATABASE_URL{{NC}}\`. Which may need to be manually set."
     -cargo sqlx prepare --check --workspace
 
 # Watch a file: compile & run on changes.
@@ -74,6 +75,7 @@ gen-env:
 
 # Pull local schema to dir to allow off-line building.
 sqlx-prep:
+    @echo "{{GRN}}Note{{NC}}: this references {{BLU}}.env{{NC}} > \`{{BLU}}DATABASE_URL{{NC}}\`. Which may need to be manually set."
     cargo install sqlx-cli
     @echo "Database path required to pull schema."
     cargo sqlx prepare --workspace -- --all-targets --all-features

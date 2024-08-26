@@ -15,6 +15,22 @@ So just wrapping run code in cli and using hyperfine.  Appropriate granularity t
 (Curious about future zero-copy implementation using async stream -- and what optimizations compiler might render without my carefulyl placing in memory.)
 comparative times (for memory transpose approaches)
 
+## Execution notes
+- DATABASE_URL value is used by `cargo sqlx ...` commands. (note: this may vary, for example, across git-branches)
+- Docker may need to be running and instance available depending on branch (see `just ...` commands)
+- At extreme:
+    ```zsh
+    echo "Check for proper url being available:"
+    bat .env
+    ```
+    change .env if needed
+    *open docker*
+    ```zsh
+    just docker-destroy
+    just docker-comp
+    just sqlx-prep
+    just check
+    ```
 
 
 ## SQLx syntax notes

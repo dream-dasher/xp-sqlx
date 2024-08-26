@@ -20,7 +20,7 @@ struct Args {
     /// Select the implementation to test
     implementation: TransImpl,
     /// Number of times to repeat the test
-    repetition: u32,
+    repetition:     u32,
 }
 
 #[derive(ValueEnum, Clone, Debug)]
@@ -32,11 +32,9 @@ enum TransImpl {
 }
 
 #[derive(Debug, Constructor, Display)]
-#[display(
-    "Vec<Struct>_macro! impl time: {}\nStruct<Vec<field>...>_macro! impl time: {}",
-    v_of_struct_macro,
-    struct_of_v_macro
-)]
+#[display("Vec<Struct>_macro! impl time: {}\nStruct<Vec<field>...>_macro! impl time: {}",
+          v_of_struct_macro,
+          struct_of_v_macro)]
 struct TimesTaken {
     pub struct_of_v_macro: u128,
     pub v_of_struct_macro: u128,
@@ -55,9 +53,7 @@ async fn main() -> Result<(), sqlx::Error> {
     };
 
     let elapsed_time = now.elapsed();
-    println!(
-        "\n\nTotal Time Recorded (ms):\n{:#?}",
-        elapsed_time.as_millis()
-    );
+    println!("\n\nTotal Time Recorded (ms):\n{:#?}",
+             elapsed_time.as_millis());
     Ok(())
 }

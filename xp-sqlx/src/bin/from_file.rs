@@ -22,30 +22,27 @@ use sqlx::mysql::MySqlPoolOptions;
 /// More work, and more potential for mistakes
 /// but more control than with `query_as!`
 #[derive(Debug, Display)]
-#[display(
-    "StudentQ:{} Name: {} {} Born: {}",
-    "id",
-    "first_name.clone().unwrap_or_default()",
-    "last_name.clone().unwrap_or_default()",
-    "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())"
-)]
+#[display("StudentQ:{} Name: {} {} Born: {}",
+          "id",
+          "first_name.clone().unwrap_or_default()",
+          "last_name.clone().unwrap_or_default()",
+          "dob.map_or(\"N/A\".to_string(), |dob| dob.to_string())")]
 struct StudentQA {
     // this is part of FromRow, which query_as! does not use
     // #[sqlx(rename = "StudentID")]
-    id: i32,
+    id:         i32,
     first_name: Option<String>,
-    last_name: Option<String>,
-    dob: Option<NaiveDate>,
-    school: Option<String>,
-    email: Option<String>,
+    last_name:  Option<String>,
+    dob:        Option<NaiveDate>,
+    school:     Option<String>,
+    email:      Option<String>,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
-    let pool = MySqlPoolOptions::new()
-        .max_connections(2)
-        .connect("mysql://root:root@127.0.0.1/university")
-        .await?;
+    let pool = MySqlPoolOptions::new().max_connections(2)
+                                      .connect("mysql://root:root@127.0.0.1/university")
+                                      .await?;
     println!("~~~~~~~~~~~~~~~");
     students_10_qa(&pool).await?;
 

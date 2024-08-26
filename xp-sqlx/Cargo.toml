@@ -11,16 +11,16 @@ clap = { version = "4.5.4", features = [
     "string",
     "wrap_help",
 ] }
-derive_more = "0.99"
+derive_more = { version = "1.0", features = ["full"] }
 dialoguer = "0.11.0"
-eframe = "0.27"
-egui = "0.27"
-egui_extras = "0.27"
-egui_inbox = "0.4"
+eframe = "0.28"
+egui = "0.28"
+egui_extras = "0.28"
+egui_inbox = "0.5"
 futures = "0.3"
 include_dir = "0.7.3"
 polars.workspace = true
-sqlx = { version = "0.7", features = [
+sqlx = { version = "0.8", features = [
     "mysql",
     "runtime-tokio",
     "tls-rustls",

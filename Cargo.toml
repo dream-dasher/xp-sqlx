@@ -3,4 +3,43 @@ members = ["xp-sqlx", "proc_macro"]
 resolver = "2"
 
 [workspace.dependencies]
-polars = { version = "0.42", features = ["lazy", "serde", "parquet", "polars-io", "temporal"] }
+## -- Local --
+proc_macro = { path = "../proc_macro" }
+## --General --
+chrono = "0.4"
+derive_more = { version = "1.0", features = ["full"] }
+include_dir = "0.7.3"
+
+## -- DATA --
+polars = { version = "0.42", features = [
+    "lazy",
+    "serde",
+    "parquet",
+    "polars-io",
+    "temporal",
+] }
+sqlx = { version = "0.8", features = [
+    "mysql",
+    "runtime-tokio",
+    "tls-rustls",
+    "macros",
+    "chrono",
+] }
+
+## -- CLI -- 
+dialoguer = "0.11.0"
+clap = { version = "4.5.4", features = [
+    "env",
+    "derive",
+    "string",
+    "wrap_help",
+] }
+## -- Async -- 
+futures = "0.3"
+tokio = { version = "1.37", features = ["full", "tracing"] }
+
+## --egui--
+# eframe = "0.28"
+# egui = "0.28"
+# egui_extras = "0.28"
+# egui_inbox = "0.5"

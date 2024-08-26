@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-syn = "2.0"
-quote = "1.0"
-polars.workspace = true
+syn = "2"
+quote = "1"
+polars = { workspace = true }
 
 [lib]
 proc-macro = true

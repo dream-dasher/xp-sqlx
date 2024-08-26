@@ -4,13 +4,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+## -- Local --
+proc_macro = { path = "../proc_macro" }
+## -- General -- 
 chrono = { workspace = true }
-clap = { workspace = true }
 derive_more = { workspace = true }
-dialoguer = { workspace = true }
-futures = { workspace = true }
 include_dir = { workspace = true }
+## -- CLI --
+dialoguer = { workspace = true }
+clap = { workspace = true }
+## -- DATA --
 polars = { workspace = true }
 sqlx = { workspace = true }
+## -- Async --
+futures = { workspace = true }
 tokio = { workspace = true }
-proc_macro = { path = "../proc_macro" }

@@ -18,12 +18,12 @@ use clap::{Parser, ValueEnum};
 use derive_more::{Constructor, Display};
 use dialoguer::{Input, Select};
 use futures::TryStreamExt;
-use include_dir::{include_dir, Dir};
-use sqlx::{mysql::{MySqlArguments, MySqlPoolOptions},
-           query::Query,
-           Arguments,
+use include_dir::{Dir, include_dir};
+use sqlx::{Arguments,
            Either::*,
-           Execute, Executor, FromRow, MySql, Row, Statement};
+           Execute, Executor, FromRow, MySql, Row, Statement,
+           mysql::{MySqlArguments, MySqlPoolOptions},
+           query::Query};
 
 /// Student to use with `query!`
 ///

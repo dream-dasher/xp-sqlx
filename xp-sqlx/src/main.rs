@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use derive_more::Display;
 use futures::TryStreamExt;
 use polars::{frame::DataFrame, prelude::*};
-use sqlx::{mysql::MySqlPoolOptions, Column, Execute, FromRow, Row};
+use sqlx::{Column, Execute, FromRow, Row, mysql::MySqlPoolOptions};
 
 /// Student to use with `query_as!`
 ///

@@ -1,7 +1,6 @@
 # Justfile (Convenience Command Runner)
 
 # rust vars
-J_CARGO_CRATE_NAME:=''
 J_CARGO_NO_WARN := '-Awarnings'
 J_RUST_LOG:= 'debug'
 J_RUST_BACKTRACE:= '1'
@@ -139,7 +138,6 @@ _gen-env:
         echo '`{{BRN}}.env{{NC}}` exists, {{PRP}}skipping creation{{NC}}...' && exit 0; \
         else \
         cp -n .support/_template.env .env; \
-        sd '\{\{replace_me:.*\}\}' '{{J_CARGO_CRATE_NAME}}' .env; \
         echo "{{BLU}}.env{{NC}} created from template with {{GRN}}example{{NC}} values."; \
         fi
 

@@ -36,9 +36,10 @@ _default:
 [confirm(
 'This will:
 (1) create and run a docker container containing a dummy database
-(2) perform standard cargo commands
+(2) install sqlx-cli (if not already installed)
+(3) perform standard cargo commands
     (e.g. clean, build)
-(3) generate some files if not present
+(4) generate some files if not present
     (e.g. git pre-commit hook, .env)
 
 Commands can be inspected in the currently invoked `justfile`.
@@ -46,7 +47,7 @@ Commands can be inspected in the currently invoked `justfile`.
 -- Confirm initialization?'
 )]
 [group('init')]
-init: docker-comp && list-external-deps _gen-env _gen-git-hooks
+init: docker-comp _install-sqlx-cli && list-external-deps _gen-env _gen-git-hooks
     cargo clean
     cargo build
     cargo doc --all-features --document-private-items
@@ -136,9 +137,13 @@ rust-meta-info:
 [group('sqlx')]
 sqlx-prep:
     @echo "{{GRN}}Note{{NC}}: this references {{BLU}}.env{{NC}} > \`{{BLU}}DATABASE_URL{{NC}}\`. Which may need to be manually set."
-    cargo install sqlx-cli
     @echo "Database path required to pull schema."
     cargo sqlx prepare --workspace -- --all-targets --all-features
+    
+# Cargo install sqlx-cli
+[group('sqlx')]
+_install-sqlx-cli:
+    cargo install sqlx-cli
 
 # Enter MySQL instance "remotely" with container.
 [group('mysql')]

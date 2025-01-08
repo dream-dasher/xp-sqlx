@@ -18,10 +18,11 @@ async fn main() -> Result<(), sqlx::Error> {
 
         match &args.command {
                 Commands::FeaturesDistinct => {
-                        for (pool, region_str) in [(pool_us, "US"), (pool_eu, "EU")] {
+                        let pools = [(pool_us, "US"), (pool_eu, "EU")];
+                        for (pool, region_str) in &pools {
                                 println!("\nFetching distinct features for region: {:?}", region_str);
 
-                                let mut rows = sqlx::query_file!("data/sql_queries/features_distinct.sql").fetch(&pool);
+                                let mut rows = sqlx::query_file!("data/sql_queries/features_distinct.sql").fetch(pool);
 
                                 while let Some(row) = rows.try_next().await? {
                                         println!(
@@ -32,6 +33,25 @@ async fn main() -> Result<(), sqlx::Error> {
                                                 row.last_occurrence,
                                                 row.log_of_inferred_region,
                                         );
+                                }
+                        }
+                        for (pool, _region_str) in &pools {
+                                let mut rows =
+                                        sqlx::query_file_as!(FeatureRecord, "data/sql_queries/features_distinct.sql")
+                                                .fetch(pool);
+
+                                while let Some(record) = rows.try_next().await? {
+                                        println!("Feature: {:?}", record.feature_name);
+                                        println!("  Count: {:?}", record.feature_count);
+                                        println!("  First seen: {:?}", record.first_occurrence);
+                                        println!("  Last seen: {:?}", record.last_occurrence);
+                                        println!("  Server info:");
+                                        println!("    Region: {:?}", record.log_of_inferred_region);
+                                        println!("    Host: {:?}", record.log_of_hostname);
+                                        println!("    Database: {:?}", record.log_of_database);
+                                        println!("    Server UUID: {:?}", record.log_of_server_uuid);
+                                        println!("    Time of query: {:?}", record.log_of_query_start_time_utc);
+                                        println!();
                                 }
                         }
                 }
@@ -79,6 +99,19 @@ async fn main() -> Result<(), sqlx::Error> {
 
         Ok(())
 }
+#[derive(Debug)]
+struct FeatureRecord {
+        feature_name:                Option<String>,
+        feature_count:               i64,
+        first_occurrence:            Option<chrono::NaiveDateTime>,
+        last_occurrence:             Option<chrono::NaiveDateTime>,
+        log_of_inferred_region:      Option<String>,
+        log_of_hostname:             Option<String>,
+        log_of_server_uuid:          Option<String>,
+        log_of_database:             Option<String>,
+        log_of_query_start_time_utc: Option<chrono::NaiveDateTime>,
+}
+
 /// Simple query on subdomains
 #[derive(Parser, Debug)]
 #[command(version, about)]

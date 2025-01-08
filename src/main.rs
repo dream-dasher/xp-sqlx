@@ -4,34 +4,37 @@ use clap::{Parser, Subcommand};
 use futures::TryStreamExt;
 use sqlx::{Row, mysql::MySqlPool};
 
-/// Simple query on subdomains
-#[derive(Parser, Debug)]
-#[command(version, about)]
-struct Args {
-        // Regex string to compare to `account.subdomain`
-        #[command(subcommand)]
-        command: Commands,
-}
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-        /// Search subdomain names using regex
-        SubdomainSearch {
-                ///Regex pattern to match against subdomain names
-                regex: String,
-        },
-}
+const PD_PROD_SDM_US: &str = "mysql://127.0.0.1:13309/pagerduty_production";
+const PD_PROD_SDM_EU: &str = "mysql://127.0.0.1:13310/pagerduty_production";
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
         let args = Args::parse();
 
         // SDM gated US-prod_webDB
-        let pool_us = MySqlPool::connect("mysql://127.0.0.1:13309/pagerduty_production").await?;
+        let pool_us = MySqlPool::connect(PD_PROD_SDM_US).await?;
         // SDM gated EU-prod_webDB
-        let pool_eu = MySqlPool::connect("mysql://127.0.0.1:13310/pagerduty_production").await?;
+        let pool_eu = MySqlPool::connect(PD_PROD_SDM_EU).await?;
 
         match &args.command {
+                Commands::FeaturesDistinct => {
+                        for (pool, region_str) in [(pool_us, "US"), (pool_eu, "EU")] {
+                                println!("\nFetching distinct features for region: {:?}", region_str);
+
+                                let mut rows = sqlx::query_file!("data/sql_queries/features_distinct.sql").fetch(&pool);
+
+                                while let Some(row) = rows.try_next().await? {
+                                        println!(
+                                                "Feature: {:?}, Count: {:?}, First: {:?}, Last: {:?}, Region: {:?}",
+                                                row.feature_name,
+                                                row.feature_count,
+                                                row.first_occurrence,
+                                                row.last_occurrence,
+                                                row.log_of_inferred_region,
+                                        );
+                                }
+                        }
+                }
                 Commands::SubdomainSearch { regex } => {
                         for (pool, region_str) in [(pool_us, "US"), (pool_eu, "EU")] {
                                 println!("\nPool corresponding to region: {:?}", region_str);
@@ -75,4 +78,23 @@ async fn main() -> Result<(), sqlx::Error> {
         }
 
         Ok(())
+}
+/// Simple query on subdomains
+#[derive(Parser, Debug)]
+#[command(version, about)]
+struct Args {
+        // Regex string to compare to `account.subdomain`
+        #[command(subcommand)]
+        command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+        /// List distinct features and their counts
+        FeaturesDistinct,
+        /// Search subdomain names using regex
+        SubdomainSearch {
+                ///Regex pattern to match against subdomain names
+                regex: String,
+        },
 }

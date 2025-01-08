@@ -35,11 +35,10 @@ _default:
 # Initialize repository.
 [confirm(
 'This will:
-(1) create and run a docker container containing a dummy database
-(2) install sqlx-cli (if not already installed)
-(3) perform standard cargo commands
+(1) install sqlx-cli (if not already installed)
+(2) perform standard cargo commands
     (e.g. clean, build)
-(4) generate some files if not present
+(3) generate some files if not present
     (e.g. git pre-commit hook, .env)
 
 Commands can be inspected in the currently invoked `justfile`.
@@ -47,7 +46,7 @@ Commands can be inspected in the currently invoked `justfile`.
 -- Confirm initialization?'
 )]
 [group('init')]
-init: docker-comp _install-sqlx-cli && list-external-deps _gen-env _gen-git-hooks
+init: _install-sqlx-cli && list-external-deps _gen-env _gen-git-hooks
     cargo clean
     cargo build
     cargo doc --all-features --document-private-items

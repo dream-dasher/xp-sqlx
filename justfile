@@ -35,9 +35,10 @@ _default:
 # Initialize repository.
 [confirm(
 'This will:
-(1) perform standard cargo commands
+(1) create and run a docker container containing a dummy database
+(2) perform standard cargo commands
     (e.g. clean, build)
-(2) generate some files if not present
+(3) generate some files if not present
     (e.g. git pre-commit hook, .env)
 
 Commands can be inspected in the currently invoked `justfile`.
@@ -45,7 +46,7 @@ Commands can be inspected in the currently invoked `justfile`.
 -- Confirm initialization?'
 )]
 [group('init')]
-init: && list-external-deps _gen-env _gen-git-hooks docker-comp
+init: docker-comp && list-external-deps _gen-env _gen-git-hooks
     cargo clean
     cargo build
     cargo doc --all-features --document-private-items

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = "0.4.39"
 clap = { version = "4.5.4", features = ["env", "derive", "string", "wrap_help"] }
 futures = "0.3.30"
 sqlx = { version = "0.8.3", features = ["mysql", "runtime-tokio", "tls-rustls", "macros", "chrono"] }
